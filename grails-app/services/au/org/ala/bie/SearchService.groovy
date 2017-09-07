@@ -864,6 +864,31 @@ class SearchService {
         model
     }
 
+    def serializeClassificationTaxon(taxon) {
+        [
+            guid: taxon.guid,
+            scientificName: taxon.scientificName,
+            commonName: taxon.commonNameSingle,
+            rank: taxon.rank,
+            rankID: taxon.rankID
+        ]
+    }
+
+    def fetchJSON(url) {
+        def response = new URL(Encoder.encodeUrl(url)).getText("UTF-8")
+
+        def parser = new JsonSlurper()
+        parser.parseText(response)
+    }
+
+    def getTaxaOccurrenceCounts(guids) {
+        def serviceURL = grailsApplication.config.biocacheService.baseUrl
+        def guidsParam = guids.join("\n")
+        def url = serviceURL + "/occurrences/taxaCount?guids=${guidsParam}"
+
+        fetchJSON(url)
+    }
+
     /**
      * Retrieve a classification for the supplied taxonID.
      *
@@ -871,16 +896,13 @@ class SearchService {
      */
     def getClassification(taxonID){
         def classification = []
+        def guids = [taxonID]
+
         def taxon = retrieveTaxon(taxonID)
 
         if (!taxon) return classification // empty list
 
-        classification.add(0, [
-                rank : taxon.rank,
-                rankID : taxon.rankID,
-                scientificName : taxon.scientificName,
-                guid:taxonID
-        ])
+        classification.add(0, serializeClassificationTaxon(taxon))
 
         //get parents
         def parentGuid = taxon.parentGuid
@@ -888,18 +910,25 @@ class SearchService {
 
         while(parentGuid && !stop){
             taxon = retrieveTaxon(parentGuid)
+
+            guids.add(parentGuid.toString())
+
             if(taxon) {
-                classification.add(0, [
-                        rank : taxon.rank,
-                        rankID : taxon.rankID,
-                        scientificName : taxon.scientificName,
-                        guid : taxon.guid
-                ])
+                classification.add(0, serializeClassificationTaxon(taxon))
+
                 parentGuid = taxon.parentGuid
             } else {
                 stop = true
             }
         }
+
+        // Add counts
+        def counts = getTaxaOccurrenceCounts(guids)
+
+        classification.each { taxonData ->
+            taxonData["occurrenceCount"] = counts[taxonData.guid]
+        }
+
         classification
     }
 
