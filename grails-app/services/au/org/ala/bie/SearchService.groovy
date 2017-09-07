@@ -370,23 +370,29 @@ class SearchService {
             queryUrl = queryUrl + "&" + queryString
         }
 
-        def queryResponse = new URL(Encoder.encodeUrl(queryUrl)).getText("UTF-8")
-        def js = new JsonSlurper()
-        def json = js.parseText(queryResponse)
-        def children = []
+        def json = fetchJSON(queryUrl)
         def taxa = json.response.docs
+
+        def children = []
+
+        def counts = getTaxaOccurrenceCounts(taxa.collect { taxon -> taxon.guid })
+
         taxa.each { taxon ->
             children << [
-                    guid:taxon.guid,
-                    parentGuid: taxon.parentGuid,
-                    name: taxon.scientificName,
-                    nameComplete: taxon.nameComplete ?: taxon.scientificName,
-                    nameFormatted: taxon.nameFormatted,
-                    author: taxon.scientificNameAuthorship,
-                    rank: taxon.rank,
-                    rankID:taxon.rankID
+                guid: taxon.guid,
+                parentGuid: taxon.parentGuid,
+                name: taxon.scientificName,
+                nameComplete: taxon.nameComplete ?: taxon.scientificName,
+                nameFormatted: taxon.nameFormatted,
+                author: taxon.scientificNameAuthorship,
+                rank: taxon.rank,
+                rankID: taxon.rankID,
+                occurrenceCount: counts[taxon.guid],
+                commonName: taxon.commonNameSingle
             ]
         }
+
+
         children.sort { it.name }
     }
 
