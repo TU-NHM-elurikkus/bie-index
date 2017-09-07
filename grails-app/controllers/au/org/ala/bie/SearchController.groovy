@@ -23,6 +23,7 @@ class SearchController {
             response.sendError(404, "Please provide a GUID")
             return null
         }
+
         def classification = searchService.getClassification(params.id)
 
         if (!classification) {
