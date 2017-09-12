@@ -887,12 +887,41 @@ class SearchService {
         parser.parseText(response)
     }
 
+    def split(xs, batchSize) {
+        def batches = []
+        def currentBatch = []
+
+        xs.each { x ->
+            currentBatch << x
+
+            if(currentBatch.size() == batchSize) {
+                batches << currentBatch
+                currentBatch = []
+            }
+        }
+
+        if(!currentBatch.isEmpty()) {
+            batches << currentBatch
+        }
+
+        batches
+    }
+
     def getTaxaOccurrenceCounts(guids) {
         def serviceURL = grailsApplication.config.biocacheService.baseUrl
-        def guidsParam = guids.join("\n")
-        def url = serviceURL + "/occurrences/taxaCount?guids=${guidsParam}"
+        def counts = [:]
 
-        fetchJSON(url)
+        // Split guids into batches so that we don't hit the URL length limit
+        split(guids, 20).each { batch ->
+            def guidsParam = batch.join("\n")
+            def url = serviceURL + "/occurrences/taxaCount?guids=${guidsParam}"
+
+            def batchCounts = fetchJSON(url)
+
+            counts.putAll(batchCounts)
+        }
+
+        counts
     }
 
     /**
