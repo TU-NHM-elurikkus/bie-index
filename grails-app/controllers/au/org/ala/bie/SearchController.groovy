@@ -2,6 +2,7 @@ package au.org.ala.bie
 
 import au.org.ala.bie.search.SearchResultsDTO
 import grails.converters.JSON
+
 /**
  * A set of JSON based search web services.
  */
@@ -18,7 +19,7 @@ class SearchController {
      *
      * @return
      */
-    def classification(){
+    def classification() {
         if(!params.id){
             response.sendError(404, "Please provide a GUID")
             return null
@@ -38,7 +39,7 @@ class SearchController {
      *
      * @return
      */
-    def imageSearch(){
+    def imageSearch() {
         asJson ([searchResults:searchService.imageSearch(params.id, params.start, params.rows, params.qc)])
     }
 
@@ -64,7 +65,7 @@ class SearchController {
      *
      * @return
      */
-    def childConcepts(){
+    def childConcepts() {
         if(!params.id){
             response.sendError(404, "Please provide a GUID")
             return null
@@ -72,7 +73,7 @@ class SearchController {
         render (searchService.getChildConcepts(params.id, request.queryString) as JSON)
     }
 
-    def guid(){
+    def guid() {
         if(params.name == 'favicon') return; //not sure why this is happening....
         if(!params.name){
             response.sendError(404, "Please provide a name for lookups")
@@ -87,7 +88,7 @@ class SearchController {
         }
     }
 
-    def shortProfile(){
+    def shortProfile() {
         if(params.id == 'favicon') return; //not sure why this is happening....
         if(!params.id){
             response.sendError(404, "Please provide a GUID")
@@ -110,11 +111,11 @@ class SearchController {
             asJsonP(params,result)
      }
 
-    def bulkGuidLookup(){
+    def bulkGuidLookup() {
         def guidList = request.JSON
         def results = searchService.getTaxa(guidList)
         if(!results){
-            response.sendError(404,"GUID not recognised ${params.id}")
+            response.sendError(404, "GUID not recognised ${params.id}")
             return null
         } else {
             def dto = [searchDTOList: results]
@@ -127,7 +128,7 @@ class SearchController {
      *
      * @return
      */
-    def taxon(){
+    def taxon() {
         def guid = params.id
         if(guid == 'favicon') return; //not sure why this is happening....
         if(!guid){
@@ -171,7 +172,7 @@ class SearchController {
      *
      * @return
      */
-    def download(){
+    def download() {
         response.setHeader("Cache-Control", "must-revalidate");
         response.setHeader("Pragma", "must-revalidate");
         response.setHeader("Content-Disposition", "attachment;filename=${params.file?:'species.csv'}");
@@ -184,7 +185,7 @@ class SearchController {
      *
      * @return
      */
-    def auto(){
+    def auto() {
         log.debug("auto called with q = " + params.q)
         log.debug("auto called with queryString = " + request.queryString)
         def fqString = ""
@@ -214,7 +215,7 @@ class SearchController {
      *
      * @return
      */
-    def search(){
+    def search() {
         try {
             def facets = []
             def requestFacets = params.getList("facets")
