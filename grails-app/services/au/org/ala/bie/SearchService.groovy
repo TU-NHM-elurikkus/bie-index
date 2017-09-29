@@ -1067,11 +1067,21 @@ class SearchService {
                 }
 
                 if(it.image){
+                    def image = it.image.replaceFirst("^/data", "")
+                    def extIndex = image.lastIndexOf(".")
+                    def imageName = image
+                    def ext = ""
+
+                    if(extIndex != -1) {
+                        imageName = image.substring(0, extIndex)
+                        ext = image.substring(extIndex)
+                    }
+
                     doc.put("image", it.image)
-                    doc.put("imageUrl", "${grailsApplication.config.imageSmallUrl}${it.image}")
-                    doc.put("thumbnailUrl", "${grailsApplication.config.imageThumbnailUrl}${it.image}")
-                    doc.put("smallImageUrl", "${grailsApplication.config.imageSmallUrl}${it.image}")
-                    doc.put("largeImageUrl", "${grailsApplication.config.imageLargeUrl}${it.image}")
+                    doc.put("imageUrl", "${grailsApplication.config.imageLargeUrl}${image}")
+                    doc.put("thumbnailUrl", "${grailsApplication.config.imageThumbnailUrl}${imageName}__thumb${ext}")
+                    doc.put("smallImageUrl", "${grailsApplication.config.imageSmallUrl}${imageName}__small${ext}")
+                    doc.put("largeImageUrl", "${grailsApplication.config.imageLargeUrl}${imageName}__large${ext}")
                 }
 
                 if(getAdditionalResultFields()){
