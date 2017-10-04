@@ -1383,9 +1383,14 @@ class ImportService {
         def listConfig = slurper.parse(new URL(grailsApplication.config.imagesListsUrl))
         def imageMap = collectImageLists(listConfig.lists)
         def rankMap = listConfig.ranks.collectEntries { r -> [(r.rank): r] }
-        def boosts = listConfig.boosts.collect({"bq=" + it}).join("&")
         def imageFields = listConfig.imageFields?:IMAGE_FIELDS
         log.debug "listConfig = ${listConfig} || imageFields = ${listConfig.imageFields}"
+
+        def boosts = grailsApplication.config.imageBoosts
+            .split(",")
+            .collect({ bq -> "bq=${bq}" })
+            .join("&");
+
         def lastImage = [imageId: "none", taxonID: "none", name: "none"]
         def addImageSearch = { query, field, value, boost ->
             if (field && value) {
@@ -1423,10 +1428,10 @@ class ImportService {
                                 query = addImageSearch(query, rank.nameField, name, 50)
                                 query = addImageSearch(query, rank.idField, taxonID, 20)
                                 if (query) {
-                                    def taxonSearchUrl = biocacheSolrUrl + "/select?q=(${query})+AND+multimedia:Image&${boosts}&rows=5&wt=json&fl=${imageFields}"
-                                    //def taxonResponse = Encoder.encodeUrl(taxonSearchUrl).toURL().getText("UTF-8")
+                                    def taxonSearchUrl = biocacheSolrUrl + "/select?q=(${query})+AND+multimedia:Image&defType=edismax&${boosts}&rows=5&wt=json&fl=${imageFields}"
                                     def taxonResponse = Encoder.encodeUrl(taxonSearchUrl).toURL().getText("UTF-8")
                                     def taxonJson = js.parseText(taxonResponse)
+
                                     if (taxonJson.response.numFound > 0) {
                                         // Case does not necessarily match between bie and biocache
                                         def occurrence = taxonJson.response.docs.find { !kingdom || kingdom.equalsIgnoreCase(it.kingdom) }
@@ -1454,6 +1459,7 @@ class ImportService {
                 }
                 if (!buffer.isEmpty())
                     indexService.indexBatch(buffer, online)
+
                 def percentage = Math.round(processed * 100 / total)
                 def speed = Math.round((pageSize * 1000) / (System.currentTimeMillis() - startTime))
                 log("Processed ${processed} names (${percentage}%), added ${added} images, ${speed} taxa per second. Last image ${lastImage.imageId} for ${lastImage.name}, ${lastImage.taxonID}")
