@@ -19,7 +19,6 @@ import au.org.ala.web.AlaSecured
 /**
  * Controller for data import into the system.
  */
-@AlaSecured(value = "ROLE_ADMIN", redirectUri = "/")
 class ImportController {
 
     def importService, bieAuthService
