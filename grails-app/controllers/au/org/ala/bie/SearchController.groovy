@@ -186,8 +186,6 @@ class SearchController {
      * @return
      */
     def auto() {
-        log.debug("auto called with q = " + params.q)
-        log.debug("auto called with queryString = " + request.queryString)
         def fqString = ""
         def limit = params.limit
         def idxType = params.idxType
