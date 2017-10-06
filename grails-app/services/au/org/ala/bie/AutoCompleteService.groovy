@@ -43,19 +43,19 @@ class AutoCompleteService {
 
         def autoCompleteList = []
 
-        String query = ""
-        if (!q || q.trim() == "*") {
+        String query = q.trim()
+        if (!query || query == "*") {
             query = otherParams + "&q=*:*"
-        } else if (q) {
+        } else {
             // encode query (no fields needed due to qf params
-            query = otherParams + "&q=" + URLEncoder.encode("" + q + "","UTF-8")
+            query = otherParams + "&q=\"${q}\""
         }
 
-        log.info "queryString = ${otherParams}"
-
+        log.debug("query: " + query)
         String queryUrl = grailsApplication.config.indexLiveBaseUrl + "/suggest?wt=json&" + query
-        log.debug "queryUrl = |${queryUrl}|"
-        def queryResponse = new URL(Encoder.encodeUrl(queryUrl)).getText("UTF-8")
+        queryUrl = Encoder.encodeUrl(queryUrl)
+        log.debug("queryUrl: " + queryUrl)
+        def queryResponse = new URL(queryUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
 
@@ -74,27 +74,31 @@ class AutoCompleteService {
      * @return
      */
     List autoLegacy(String q, String otherParams){
-        log.debug("auto called with q = " + q)
-
         def autoCompleteList = []
         // TODO store param string in config var
         String qf = "qf=commonNameSingle^100+commonName^100+auto_text^100+text"
         String bq = "bq=taxonomicStatus:accepted^1000&bq=rankID:7000^500&bq=rankID:6000^100&bq=-scientificName:\"*+x+*\"^100"
-        def additionalParams = "&defType=edismax&${qf}&${bq}&wt=json"
-        String query = ""
+        def additionalParams = "&${qf}&${bq}&wt=json"
 
-        if (!q || q.trim() == "*") {
-            query = otherParams + "&q=*:*"
-        } else if (q) {
-            // encode query (no fields needed due to qf params
-            query = otherParams + "&q=" + URLEncoder.encode("" + q + "","UTF-8")
+        String query = q.trim()
+        if (!query || query == "*") {
+            query = "&q=*:*"
+            additionalParams = "&sort=scientificName asc" + additionalParams
+        } else if (query.indexOf(" ") > -1) {
+            query = "&q=\"${q}\"^4 ${q}"
+        } else if (query.length() < 3) {
+            query = "&q=${q}*"
+        } else {
+            // additionalParams = "&defType=edismax" + additionalParams
+            query = "&q=\"${q}\"^8 ${q}*"
         }
+        query = otherParams + query
 
-        log.info "queryString = ${otherParams}"
-
+        log.debug("query: " + query)
         String queryUrl = grailsApplication.config.indexLiveBaseUrl + "/select?" + query + additionalParams
-        log.debug "queryUrl = |${queryUrl}|"
-        def queryResponse = new URL(Encoder.encodeUrl(queryUrl)).getText("UTF-8")
+        queryUrl = Encoder.encodeUrl(queryUrl)
+        log.debug("queryUrl: " + queryUrl)
+        def queryResponse = new URL(queryUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
 
@@ -102,10 +106,6 @@ class AutoCompleteService {
             autoCompleteList << createAutoCompleteFromIndex(it, q)
         }
 
-        // sort by rank ID
-        // code removed by Nick (2016-08-02) see issue #72 - boost query values now perform same function
-
-        log.debug("results: " + autoCompleteList.size())
         autoCompleteList
     }
 
