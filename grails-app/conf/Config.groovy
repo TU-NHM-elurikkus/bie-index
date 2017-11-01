@@ -1,23 +1,30 @@
 import org.apache.log4j.Level
 
-def appName = "bie-index"
 
 grails.project.groupId = "au.org.ala" // change this to alter the default package name and Maven publishing destination
 
 default_config = "/data/${appName}/config/${appName}-config.properties"
-if(!grails.config.locations || !(grails.config.locations instanceof List)) {
-    grails.config.locations = []
-}
+commons_config = "/data/commons/config/commons-config.properties"
+env_config = "conf/${Environment.current.name}/Config.groovy"
 
-if (new File(default_config).exists()) {
-    println "[${appName}] Including default configuration file: " + default_config;
-    grails.config.locations.add "file:" + default_config
-} else {
-    println "[${appName}] No external configuration file defined."
+grails.config.locations = [
+    "file:${env_config}",
+    "file:${commons_config}",
+    "file:${default_config}"
+]
+
+if(!new File(env_config).exists()) {
+    println "ERROR - [${appName}] Couldn't find environment specific configuration file: ${env_config}"
+}
+if(!new File(default_config).exists()) {
+    println "ERROR - [${appName}] No external configuration file defined. ${default_config}"
+}
+if(!new File(commons_config).exists()) {
+    println "ERROR - [${appName}] No external commons configuration file defined. ${commons_config}"
 }
 
 println "[${appName}] (*) grails.config.locations = ${grails.config.locations}"
-println "default_config = ${default_config}"
+
 
 indexLiveBaseUrl = "http://localhost:8080/solr/bie"
 indexOfflineBaseUrl = "http://localhost:8080/solr/bie-offline"
@@ -168,28 +175,44 @@ environments {
 }
 
 // log4j configuration
-def loggingDir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs' : './logs')
+def logging_dir = System.getProperty("catalina.base") ? System.getProperty("catalina.base") + "/logs"  : "/var/log/tomcat7"
+if(!new File(logging_dir).exists()) {
+    logging_dir = "/tmp"
+}
+
+println "INFO - [${appName}] logging_dir: ${logging_dir}"
 
 log4j = {
+    def logPattern = pattern(conversionPattern: "%d %-5p [%c{1}] %m%n")
+
+    def tomcatLogAppender = rollingFile(
+        name: "tomcatLog",
+        maxFileSize: "10MB",
+        file: "${logging_dir}/specieslist.log",
+        threshold: org.apache.log4j.Level.WARN,
+        layout: logPattern
+    )
+
     appenders {
         environments {
             production {
-                println "BIE index logs will be written to : ${loggingDir}"
-                rollingFile name: "tomcatLog", maxFileSize: '1MB', file: "${loggingDir}/${appName}.log", threshold: Level.INFO, layout: pattern(conversionPattern: "%d %-5p [%c{1}] %m%n")
-            }
-            development {
-                console name: "stdout", layout: pattern(conversionPattern: "%d %-5p [%c{1}] %m%n"), threshold: Level.DEBUG
+                appender(tomcatLogAppender)
             }
             test {
-                console name: "stdout", layout: pattern(conversionPattern: "%d %-5p [%c{1}] %m%n"), threshold: Level.FATAL
+                appender(tomcatLogAppender)
+            }
+            development {
+                console(
+                    name: "stdout",
+                    layout: logPattern,
+                    threshold: org.apache.log4j.Level.DEBUG)
             }
         }
     }
+
     root {
-        // change the root logger to my tomcatLog file
         error 'tomcatLog'
         warn 'tomcatLog'
-        additivity = true
     }
 
     error   'au.org.ala.cas.client',
