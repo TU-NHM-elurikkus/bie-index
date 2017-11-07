@@ -6,7 +6,14 @@ package au.org.ala.bie
  */
 class SecurityFilters {
     def filters = {
-        all(uri: "/admin/**|/alaAdmin/**") {
+        all(uri: "/admin/**") {
+            before = {
+                // Access control by convention.
+                accessControl()
+            }
+        }
+
+        all(uri: "/alaAdmin/**") {
             before = {
                 // Access control by convention.
                 accessControl()
