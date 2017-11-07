@@ -46,6 +46,7 @@ grails.project.dependency.resolution = {
             excludes 'org.slf4j:slf4j-log4j12'
         }
         runtime "org.jsoup:jsoup:1.8.3"
+        runtime "mysql:mysql-connector-java:5.1.44" // MySQL driver
 
         test "org.grails:grails-datastore-test-support:1.0-grails-2.4"
         test "org.gebish:geb-spock:0.12.2"
@@ -59,14 +60,17 @@ grails.project.dependency.resolution = {
             export = false
         }
         build ":tomcat:7.0.70"
-        compile ":cache:1.1.8"
         runtime ":cors:1.1.6"
         runtime ":ala-bootstrap3:1.6.2"
         runtime(":ala-auth:1.3.4") {
             excludes "servlet-api"
         }
         runtime ":ala-admin-plugin:1.2"
+        runtime ":hibernate:3.6.10.19"
+
+        compile ":cache:1.1.8"
         compile ":spring-websocket:1.3.0"
+        compile ":shiro:1.2.1"  // Authentication/permissions support for endpoints
 
         test ":geb:0.12.2"
     }

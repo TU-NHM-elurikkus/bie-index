@@ -47,6 +47,8 @@ class UrlMappings {
         "/subgroups"(controller: 'misc', action: 'speciesGroups')
         "/updateImages" (controller: 'misc', action: 'updateImages')
 
+        "/auth" (controller: 'auth', action: 'login')
+
         "/"(view: "/index")
         "500"(view: '/error')
     }
