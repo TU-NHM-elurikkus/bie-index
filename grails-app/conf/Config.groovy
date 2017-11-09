@@ -207,7 +207,8 @@ log4j = {
 
     root {
         error "tomcatLog"
-        warn "tomcatLog", "stdout"
+        warn "tomcatLog"
+        info "stdout"
     }
 
     error   'au.org.ala.cas.client',
