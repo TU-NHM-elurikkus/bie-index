@@ -27,23 +27,23 @@ grails.project.dependency.resolution = {
     repositories {
         mavenLocal()
         mavenRepo ("http://nexus.ala.org.au/content/groups/public/") {
-            updatePolicy 'always'
+            updatePolicy "always"
         }
     }
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes
-        compile 'com.github.davidmoten:rxjava-file:0.4'
-        compile 'io.reactivex:rxgroovy:1.0.3'
-        compile ('org.jasig.cas.client:cas-client-core:3.3.3') {
-            excludes([group: 'javax.servlet', name: 'servlet-api'])
+        compile "com.github.davidmoten:rxjava-file:0.4"
+        compile "io.reactivex:rxgroovy:1.0.3"
+        compile ("org.jasig.cas.client:cas-client-core:3.3.3") {
+            excludes([group: "javax.servlet", name: "servlet-api"])
         }
 
-        runtime 'net.sf.opencsv:opencsv:2.3'
+        runtime "net.sf.opencsv:opencsv:2.3"
         runtime "org.apache.solr:solr-solrj:5.4.0"
         runtime "org.gbif:dwca-io:1.24"
         runtime("au.org.ala:ala-name-matching:2.4.0"){
-            excludes 'org.slf4j:slf4j-log4j12'
+            excludes "org.slf4j:slf4j-log4j12"
         }
         runtime "org.jsoup:jsoup:1.8.3"
         runtime "mysql:mysql-connector-java:5.1.44" // MySQL driver
@@ -62,9 +62,6 @@ grails.project.dependency.resolution = {
         build ":tomcat:7.0.70"
         runtime ":cors:1.1.6"
         runtime ":ala-bootstrap3:1.6.2"
-        runtime(":ala-auth:1.3.4") {
-            excludes "servlet-api"
-        }
         runtime ":ala-admin-plugin:1.2"
         runtime ":hibernate:3.6.10.19"
 

@@ -2,6 +2,7 @@ class UrlMappings {
 
     static mappings = {
 
+        "/$controller/$action?/$id?"()
 
         "/species"(controller: "search", action: "taxon")
         "/species/"(controller: "search", action: "taxon")
@@ -42,14 +43,12 @@ class UrlMappings {
 
         "/admin/import/$action?/$id?(.$format)?"(controller: "import")
 
-        "/ws/subgroups(.json)?"(controller: 'misc', action: 'speciesGroups')
-        "/subgroups.json"(controller: 'misc', action: 'speciesGroups')
-        "/subgroups"(controller: 'misc', action: 'speciesGroups')
-        "/updateImages" (controller: 'misc', action: 'updateImages')
-
-        "/auth" (controller: 'auth', action: 'login')
+        "/ws/subgroups(.json)?"(controller: "misc", action: "speciesGroups")
+        "/subgroups.json"(controller: "misc", action: "speciesGroups")
+        "/subgroups"(controller: "misc", action: "speciesGroups")
+        "/updateImages" (controller: "misc", action: "updateImages")
 
         "/"(view: "/index")
-        "500"(view: '/error')
+        "500"(view: "/error")
     }
 }
