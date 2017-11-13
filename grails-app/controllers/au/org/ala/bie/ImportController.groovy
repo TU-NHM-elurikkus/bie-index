@@ -15,7 +15,6 @@ package au.org.ala.bie
 
 import grails.converters.JSON
 import org.apache.commons.lang.BooleanUtils
-import au.org.ala.web.AlaSecured
 /**
  * Controller for data import into the system.
  */
