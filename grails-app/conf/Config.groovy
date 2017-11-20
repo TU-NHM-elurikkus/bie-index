@@ -27,7 +27,7 @@ biocacheService.baseUrl = "http://biocache.ala.org.au/ws"
 biocache.solr.url="http://localhost:8080/solr/biocache"
 defaultNameSourceAttribution = "National Species Lists"
 commonNameSourceAttribution = "National Species Lists"
-commonNameDefaultLanguage = "en-AU"
+commonNameDefaultLanguage = "et"
 identifierSourceAttribution = "National Species Lists"
 indexImages = true
 importDir = "/data/bie/import"
@@ -88,7 +88,7 @@ solr {
     hl = "true&hl=true&hl.fl=*&hl.simple.pre=<b>&hl.simple.post=</b>"
 }
 skin.layout = "main"
-skin.orgNameLong = "Atlas of Living Australia"
+skin.orgNameLong = "eElurikkus"
 useLegacyAuto = false
 
 // The ACCEPT header will not be used for content negotiation for user agents containing the following strings (defaults to the 4 major rendering engines)

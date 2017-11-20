@@ -54,16 +54,16 @@ class ImportController {
      * @return
      */
     def importDwcA() {
+        def dwcDir = params.dwca_dir
 
-        if(!params.dwca_dir || !(new File(params.dwca_dir).exists())){
-            render ([success: false, message: 'Supply a DwC-A parameter'] as JSON)
+        if(!dwcDir || !(new File(dwcDir).exists())) {
+            render ([success: false, message: 'Supply a DwC-A source'] as JSON)
             return
         }
 
         def clearIndex = BooleanUtils.toBooleanObject(params.clear_index ?: "false")
-        def dwcDir = params.dwca_dir
 
-        if(new File(dwcDir).exists()){
+        if(new File(dwcDir).exists()) {
             Thread.start {
                 log.info("Starting import of ${dwcDir}....")
                 importService.importDwcA(dwcDir, clearIndex)

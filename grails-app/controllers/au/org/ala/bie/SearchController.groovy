@@ -130,8 +130,7 @@ class SearchController {
      */
     def taxon() {
         def guid = params.id
-        if(guid == 'favicon') return; //not sure why this is happening....
-        if(!guid){
+        if(!guid || guid == 'favicon') {  // Nick isn't sure why favicon is happening...
             response.sendError(404, "Please provide a GUID")
             return null
         }

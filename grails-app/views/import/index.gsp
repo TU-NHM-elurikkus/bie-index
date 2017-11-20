@@ -1,9 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-  <title></title>
-  <meta name="layout" content="${grailsApplication.config.skin.layout}"/>
-  <r:require modules="sockets" />
+    <title></title>
+    <meta name="layout" content="${grailsApplication.config.skin.layout}"/>
+    <r:require modules="sockets" />
 </head>
 <body>
 <div>
