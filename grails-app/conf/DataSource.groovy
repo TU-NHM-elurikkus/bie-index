@@ -4,8 +4,10 @@ dataSource {
     dialect = org.hibernate.dialect.MySQL5InnoDBDialect
     logSql = false
     dbCreate = "update"
-    url = "jdbc:mysql://localhost:3306/collectory?autoReconnect=true&connectTimeout=0"
+    url = "jdbc:mysql://localhost:3306/collectory"
     properties {
+        jmxEnabled = true
+
         maxActive = 50
         maxIdle = 25
         minIdle = 5
@@ -18,6 +20,11 @@ dataSource {
         testOnBorrow = true
         testOnReturn = true
         testWhileIdle = true
+
+        dbProperties {
+            autoReconnect = false
+            connectTimeout = 60000
+        }
     }
 }
 
