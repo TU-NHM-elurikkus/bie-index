@@ -29,14 +29,14 @@ class SearchService {
      * @param rows
      * @return
      */
-    def imageSearch(taxonID, start, rows, queryContext){
+    def imageSearch(taxonID, start, rows, queryContext) {
 
         def query = "q=*:*"
 
-        if(taxonID){
+        if (taxonID) {
             //retrieve the taxon rank and then construct the query
             def taxon = lookupTaxon(taxonID)
-            if(!taxon){
+            if (!taxon) {
                 return []
             }
             def tid = taxon.guid // no longer encoded here
@@ -45,15 +45,15 @@ class SearchService {
 
         def additionalParams = "&wt=json&fq=rankID:[7000 TO *]&fq=imageAvailable:true"
 
-        if(start){
-            additionalParams = additionalParams + "&start=" + start
+        if (start) {
+            additionalParams = "${additionalParams}&start=${start}"
         }
 
-        if(rows){
-            additionalParams = additionalParams + "&rows=" + rows
+        if (rows) {
+            additionalParams = "${additionalParams}&rows=${rows}"
         }
 
-        if(queryContext){
+        if (queryContext) {
             additionalParams = additionalParams + queryContext
         }
 
@@ -425,13 +425,13 @@ class SearchService {
      * @param taxonID
      * @return
      */
-    private def lookupTaxonByName(String taxonName, Boolean useOfflineIndex = false){
+    private def lookupTaxonByName(String taxonName, Boolean useOfflineIndex = false) {
         def indexServerUrlPrefix = grailsApplication.config.indexLiveBaseUrl
         if (useOfflineIndex) {
             indexServerUrlPrefix = grailsApplication.config.indexOfflineBaseUrl
         }
-        def solrServerUrl = indexServerUrlPrefix + "/select?wt=json&q=" +
-                "commonNameExact:\"" + taxonName + "\" OR scientificName:\"" + taxonName + "\" OR exact_text:\"" + taxonName + "\"" // exact_text added to handle case differences in query vs index
+        def solrServerUrl = "${indexServerUrlPrefix}/select?wt=json&q=commonNameExact:\"${taxonName}\" OR " +
+                "scientificName:\"${taxonName}\" OR exact_text:\"${taxonName}\"" // exact_text added to handle case differences in query vs index
 
         def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("UTF-8")
         def js = new JsonSlurper()
@@ -452,7 +452,7 @@ class SearchService {
         if (useOfflineIndex) {
             indexServerUrlPrefix = grailsApplication.config.indexOfflineBaseUrl
         }
-        String solrServerUrl = indexServerUrlPrefix + "/select?wt=json&q=guid:%22" + UriUtils.encodeQueryParam(identifier, 'UTF-8') +"%22"
+        String solrServerUrl = indexServerUrlPrefix + "/select?wt=json&q=guid:%22" + UriUtils.encodeQueryParam(identifier, 'UTF-8') + "%22"
         log.debug "SOLR url = ${solrServerUrl}"
         def queryResponse = new URL(solrServerUrl).getText("UTF-8")
         def js = new JsonSlurper()
@@ -480,11 +480,11 @@ class SearchService {
      * @param useOfflineIndex
      * @return
      */
-    def lookupVernacular(String taxonID, String vernacularName, Boolean useOfflineIndex = false){
+    def lookupVernacular(String taxonID, String vernacularName, Boolean useOfflineIndex = false) {
         def indexServerUrlPrefix = useOfflineIndex ? grailsApplication.config.indexOfflineBaseUrl : grailsApplication.config.indexLiveBaseUrl
-        def encID = URLEncoder.encode(taxonID, 'UTF-8')
+        def encID = URLEncoder.encode(taxonID, "UTF-8")
         def encName = URLEncoder.encode(vernacularName, "UTF-8")
-        def indexServerUrl = indexServerUrlPrefix+ "/select?wt=json&q=taxonGuid:%22${encID}%22&fq=(idxtype:${IndexDocType.COMMON.name()}+AND+name:%22${encName}%22)"
+        def indexServerUrl = "${indexServerUrlPrefix}/select?wt=json&q=taxonGuid:%22${encID}%22&fq=(idxtype:${IndexDocType.COMMON.name()}+AND+name:%22${encName}%22)"
         def queryResponse = new URL(indexServerUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
@@ -499,11 +499,11 @@ class SearchService {
      * @param useOfflineIndex
      * @return
      */
-    def lookupIdentifier(String taxonID, String identifier, Boolean useOfflineIndex = false){
+    def lookupIdentifier(String taxonID, String identifier, Boolean useOfflineIndex = false) {
         def indexServerUrlPrefix = useOfflineIndex ? grailsApplication.config.indexOfflineBaseUrl : grailsApplication.config.indexLiveBaseUrl
-        def encID = UriUtils.encodeQueryParam(taxonID, 'UTF-8')
-        def encIdentifier = UriUtils.encodeQueryParam(identifier, 'UTF-8') // URLEncoder.encode(identifier, "UTF-8")
-        def indexServerUrl = indexServerUrlPrefix+ "/select?wt=json&q=taxonGuid:%22${encID}%22&fq=(idxtype:${IndexDocType.IDENTIFIER.name()}+AND+guid:\"${encIdentifier}\")"
+        def encID = UriUtils.encodeQueryParam(taxonID, "UTF-8")
+        def encIdentifier = UriUtils.encodeQueryParam(identifier, "UTF-8") // URLEncoder.encode(identifier, "UTF-8")
+        def indexServerUrl = "${indexServerUrlPrefix}/select?wt=json&q=taxonGuid:%22${encID}%22&fq=(idxtype:${IndexDocType.IDENTIFIER.name()}+AND+guid:\"${encIdentifier}\")"
         def queryResponse = new URL(indexServerUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
@@ -519,8 +519,8 @@ class SearchService {
      */
     def lookupVernacular(String taxonID, Boolean useOfflineIndex = false){
         def indexServerUrlPrefix = useOfflineIndex ? grailsApplication.config.indexOfflineBaseUrl : grailsApplication.config.indexLiveBaseUrl
-        def encID = UriUtils.encodeQueryParam(taxonID, 'UTF-8')
-        def indexServerUrl = indexServerUrlPrefix+ "/select?wt=json&q=taxonGuid:%22${encID}%22&fq=idxtype:${IndexDocType.COMMON.name()}"
+        def encID = UriUtils.encodeQueryParam(taxonID, "UTF-8")
+        def indexServerUrl = "${indexServerUrlPrefix}/select?wt=json&q=taxonGuid:%22${encID}%22&fq=idxtype:${IndexDocType.COMMON.name()}"
         def queryResponse = new URL(indexServerUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
@@ -536,8 +536,8 @@ class SearchService {
      */
     def lookupIdentifier(String taxonID, Boolean useOfflineIndex = false){
         def indexServerUrlPrefix = useOfflineIndex ? grailsApplication.config.indexOfflineBaseUrl : grailsApplication.config.indexLiveBaseUrl
-        def encID = UriUtils.encodeQueryParam(taxonID, 'UTF-8') // URLEncoder.encode(taxonID, 'UTF-8')
-        def indexServerUrl = indexServerUrlPrefix+ "/select?wt=json&q=taxonGuid:%22${encID}%22&fq=idxtype:${IndexDocType.IDENTIFIER.name()}"
+        def encID = UriUtils.encodeQueryParam(taxonID, "UTF-8") // URLEncoder.encode(taxonID, "UTF-8")
+        def indexServerUrl = "${indexServerUrlPrefix}/select?wt=json&q=taxonGuid:%22${encID}%22&fq=idxtype:${IndexDocType.IDENTIFIER.name()}"
         def queryResponse = new URL(indexServerUrl).getText("UTF-8")
         def js = new JsonSlurper()
         def json = js.parseText(queryResponse)
@@ -581,9 +581,9 @@ class SearchService {
         String qf = "qf=scientificName^200+commonName^50+exact_text^100+doc_name"
         String bq = "bq=taxonomicStatus:accepted^1000&bq=rankID:7000^500&bq=rankID:6000^100&bq=-scientificName:\"*+x+*\"^100"
         def additionalParams = "&defType=edismax&${qf}&${bq}&wt=json"
-        def queryString = "&q=" + "\"" + name + "\"" + "&fq=idxtype:" + IndexDocType.TAXON.name()
+        def queryString = "&q=\"${name}\"&fq=idxtype:" + IndexDocType.TAXON.name()
         log.debug "profile search for query: ${queryString}"
-        String url = grailsApplication.config.indexLiveBaseUrl + "/select?" + queryString + additionalParams
+        String url = grailsApplication.config.indexLiveBaseUrl + "/select?${queryString}${additionalParams}"
         log.debug "profile searcURL: ${url}"
         def queryResponse = new URL(Encoder.encodeUrl(url)).getText("UTF-8")
         def js = new JsonSlurper()
@@ -594,34 +594,33 @@ class SearchService {
             def result = json.response.docs[0]
             //json.response.docs.each { result ->
                 model = [
-                        "identifier": result.guid,
-                        "guid": result.guid,
-                        "parentGuid": result.parentGuid,
-                        "name": result.scientificName,
-                        "nameComplete": result.nameComplete,
-                        "commonName" : result.commonName,
-                        "commonNameSingle" : result.commonNameSingle,
-                        "rank" : result.rank,
-                        "rankId" : result.rankID,
-                        "acceptedConceptGuid": result.acceptedConceptID ?: result.guid,
-                        "acceptedConceptName": result.acceptedConceptName ?: result.scientificName,
-                        "taxonomicStatus": result.taxonomicStatus,
-                        "imageId": result.image,
-                        "imageUrl": (result.image) ? grailsApplication.config.imageLargeUrl + result.image : "",
-                        "thumbnailUrl": (result.image) ? grailsApplication.config.imageThumbnailUrl + result.image : "",
-                        "largeImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
-                        "smallImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
-                        "imageMetadataUrl": (result.image) ? grailsApplication.config.imageMetaDataUrl + result.image : "",
-                        "kingdom": result.rk_kingdom,
-                        "phylum": result.rk_phylum,
-                        "classs": result.rk_class,
-                        "order":result.rk_order,
-                        "family": result.rk_family,
-                        "genus": result.rk_genus,
-                        "author": result.scientificNameAuthorship,
-                        "linkIdentifier": result.linkIdentifier
+                    "identifier": result.guid,
+                    "guid": result.guid,
+                    "parentGuid": result.parentGuid,
+                    "name": result.scientificName,
+                    "nameComplete": result.nameComplete,
+                    "commonName": result.commonName,
+                    "commonNameSingle": result.commonNameSingle,
+                    "rank": result.rank,
+                    "rankId": result.rankID,
+                    "acceptedConceptGuid": result.acceptedConceptID ?: result.guid,
+                    "acceptedConceptName": result.acceptedConceptName ?: result.scientificName,
+                    "taxonomicStatus": result.taxonomicStatus,
+                    "imageId": result.image,
+                    "imageUrl": (result.image) ? grailsApplication.config.imageLargeUrl + result.image : "",
+                    "thumbnailUrl": (result.image) ? grailsApplication.config.imageThumbnailUrl + result.image : "",
+                    "largeImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
+                    "smallImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
+                    "imageMetadataUrl": (result.image) ? grailsApplication.config.imageMetaDataUrl + result.image : "",
+                    "kingdom": result.rk_kingdom,
+                    "phylum": result.rk_phylum,
+                    "classs": result.rk_class,
+                    "order": result.rk_order,
+                    "family": result.rk_family,
+                    "genus": result.rk_genus,
+                    "author": result.scientificNameAuthorship,
+                    "linkIdentifier": result.linkIdentifier
                 ]
-
         }
 
         model
@@ -682,9 +681,9 @@ class SearchService {
     }
 
     private getTaxaBatch(Collection guidList) {
-        def queryList = guidList.collect({'"' + it + '"'}).join(',')
+        def queryList = guidList.collect({"\"${it}\""}).join(",")
         def postBody = [
-                q: "guid:(" + queryList + ") OR linkIdentifier:("  + queryList + ")",
+                q: "guid:(${queryList}) OR linkIdentifier:(${queryList})",
                 fq: "idxtype:" + IndexDocType.TAXON.name(),
                 rows: BULK_BATCH_SIZE,
                 wt: "json"
@@ -733,22 +732,23 @@ class SearchService {
         }
     }
 
-    def getTaxon(taxonLookup){
+    def getTaxon(taxonLookup) {
 
         def taxon = lookupTaxon(taxonLookup)
-        if(!taxon) {
+        if (!taxon) {
             taxon = lookupTaxonByName(taxonLookup)
         }
-        if(!taxon) {
+        if (!taxon) {
             taxon = lookupTaxonByPreviousIdentifier(taxonLookup)
-            if(!taxon){
+            if (!taxon){
                 return null
             }
         }
 
         //retrieve any synonyms
-        def synonymQueryUrl = grailsApplication.config.indexLiveBaseUrl + "/select?wt=json&q=" +
-                "acceptedConceptID:\"" + taxon.guid + "\"" + "&fq=idxtype:" + IndexDocType.TAXON.name()
+        def indexLiveBaseUrl = grailsApplication.config.indexLiveBaseUrl
+        def synonymQueryUrl = "${indexLiveBaseUrl}/select?wt=json&q=acceptedConceptID:\"${taxon.guid}\"&fq=idxtype:" +
+                IndexDocType.TAXON.name()
         def synonymQueryResponse = new URL(Encoder.encodeUrl(synonymQueryUrl)).getText("UTF-8")
         def js = new JsonSlurper()
         def synJson = js.parseText(synonymQueryResponse)
@@ -756,16 +756,16 @@ class SearchService {
         def synonyms = synJson.response.docs
 
         //retrieve any common names
-        def commonQueryUrl = grailsApplication.config.indexLiveBaseUrl + "/select?wt=json&q=" +
-                "taxonGuid:\"" + taxon.guid + "\"" + "&fq=idxtype:" + IndexDocType.COMMON.name()
+        def commonQueryUrl = "${indexLiveBaseUrl}/select?wt=json&q=taxonGuid:\"${taxon.guid}\"&fq=idxtype:" +
+                IndexDocType.COMMON.name()
         def commonQueryResponse = new URL(Encoder.encodeUrl(commonQueryUrl)).getText("UTF-8")
         def commonJson = js.parseText(commonQueryResponse)
         def commonNames = commonJson.response.docs.sort { n1, n2 -> n2.priority - n1.priority }
 
 
         //retrieve any additional identifiers
-        def identifierQueryUrl = grailsApplication.config.indexLiveBaseUrl + "/select?wt=json&q=" +
-                "taxonGuid:\"" + taxon.guid + "\"" + "&fq=idxtype:" + IndexDocType.IDENTIFIER.name()
+        def identifierQueryUrl = "${indexLiveBaseUrl}/select?wt=json&q=taxonGuid:\"${taxon.guid}\"&fq=idxtype:" +
+                IndexDocType.IDENTIFIER.name()
         def identifierQueryResponse = new URL(Encoder.encodeUrl(identifierQueryUrl)).getText("UTF-8")
         def identifierJson = js.parseText(identifierQueryResponse)
         def identifiers = identifierJson.response.docs
@@ -780,85 +780,87 @@ class SearchService {
         def clists = conservationListsSource.lists ?: []
         def conservationStatus = clists.inject([:], { ac, cl ->
             final cs = taxon[cl.field]
-            if (cs)
-                ac.put(cl.label, [ dr: cl.uid, status: cs ])
-            ac
+            if (cs) {
+                ac = [ dr: cl.uid, name: cs ]
+            }
+            return ac
         })
 
         def model = [
-                taxonConcept:[
-                        guid: taxon.guid,
-                        parentGuid: taxon.parentGuid,
-                        nameString: taxon.scientificName,
-                        nameComplete: taxon.nameComplete,
-                        nameFormatted: taxon.nameFormatted,
-                        author: taxon.scientificNameAuthorship,
-                        taxonomicStatus: taxon.taxonomicStatus,
-                        nomenclaturalStatus: taxon.nomenclaturalStatus,
-                        rankString: taxon.rank,
-                        nameAuthority: taxon.datasetName ?: taxonDatasetName ?: grailsApplication.config.defaultNameSourceAttribution,
-                        rankID:taxon.rankID,
-                        namePublishedIn: taxon.namePublishedIn,
-                        namePublishedInYear: taxon.namePublishedInYear,
-                        namePublishedInID: taxon.namePublishedInID,
-                        infoSourceURL: taxon.source ?: taxonDatasetURL,
-                        datasetURL: taxonDatasetURL
-                ],
-                taxonName:[],
-                classification:classification,
-                synonyms:synonyms.collect { synonym ->
-                    def datasetURL = getDataset(synonym.datasetID, datasetMap)?.guid
-                    def datasetName = getDataset(synonym.datasetID, datasetMap)?.name
-                    [
-                            nameString: synonym.scientificName,
-                            nameComplete: synonym.nameComplete,
-                            nameFormatted: synonym.nameFormatted,
-                            nameGuid: synonym.guid,
-                            taxonomicStatus: synonym.taxonomicStatus,
-                            nomenclaturalStatus: synonym.nomenclaturalStatus,
-                            namePublishedIn: synonym.namePublishedIn,
-                            namePublishedInYear: synonym.namePublishedInYear,
-                            namePublishedInID: synonym.namePublishedInID,
-                            nameAuthority: synonym.datasetName ?: datasetName ?: grailsApplication.config.synonymSourceAttribution,
-                            infoSourceURL: synonym.source ?: datasetURL,
-                            datasetURL: datasetURL
-                    ]
-                },
-                commonNames: commonNames.collect { commonName ->
-                    def datasetURL = getDataset(commonName.datasetID, datasetMap)?.guid
-                    def datasetName = getDataset(commonName.datasetID, datasetMap)?.name
-                    [
-                            nameString: commonName.name,
-                            status: commonName.status,
-                            priority: commonName.priority,
-                            language: commonName.language ?: grailsApplication.config.commonNameDefaultLanguage,
-                            infoSourceName: commonName.datasetName ?: datasetName ?: grailsApplication.config.commonNameSourceAttribution,
-                            infoSourceURL: commonName.source ?: datasetURL,
-                            datasetURL: datasetURL
-                    ]
-                },
-                imageIdentifier: taxon.image,
-                conservationStatuses:conservationStatus,
-                extantStatuses: [],
-                habitats: [],
-                categories: [],
-                simpleProperties: [],
-                images: [],
-                identifiers: identifiers.collect { identifier ->
-                    def datasetURL = getDataset(identifier.datasetID, datasetMap)?.guid
-                    def datasetName = getDataset(identifier.datasetID, datasetMap)?.name
-                    [
-                            identifier: identifier.guid,
-                            nameString: identifier.name,
-                            status: identifier.status,
-                            subject: identifier.subject,
-                            format: identifier.format,
-                            infoSourceName: identifier.datasetName ?: datasetName ?: grailsApplication.config.identifierSourceAttribution,
-                            infoSourceURL: identifier.source ?: datasetURL,
-                            datasetURL: datasetURL
-                    ]
-                }
+            taxonConcept: [
+                guid: taxon.guid,
+                parentGuid: taxon.parentGuid,
+                nameString: taxon.scientificName,
+                nameComplete: taxon.nameComplete,
+                nameFormatted: taxon.nameFormatted,
+                author: taxon.scientificNameAuthorship,
+                taxonomicStatus: taxon.taxonomicStatus,
+                nomenclaturalStatus: taxon.nomenclaturalStatus,
+                rankString: taxon.rank,
+                nameAuthority: taxon.datasetName ?: taxonDatasetName ?: grailsApplication.config.defaultNameSourceAttribution,
+                rankID: taxon.rankID,
+                namePublishedIn: taxon.namePublishedIn,
+                namePublishedInYear: taxon.namePublishedInYear,
+                namePublishedInID: taxon.namePublishedInID,
+                infoSourceURL: taxon.source ?: taxonDatasetURL,
+                datasetURL: taxonDatasetURL
+            ],
+            taxonName: [],
+            classification: classification,
+            synonyms: synonyms.collect { synonym ->
+                def datasetURL = getDataset(synonym.datasetID, datasetMap)?.guid
+                def datasetName = getDataset(synonym.datasetID, datasetMap)?.name
+                [
+                    nameString: synonym.scientificName,
+                    nameComplete: synonym.nameComplete,
+                    nameFormatted: synonym.nameFormatted,
+                    nameGuid: synonym.guid,
+                    taxonomicStatus: synonym.taxonomicStatus,
+                    nomenclaturalStatus: synonym.nomenclaturalStatus,
+                    namePublishedIn: synonym.namePublishedIn,
+                    namePublishedInYear: synonym.namePublishedInYear,
+                    namePublishedInID: synonym.namePublishedInID,
+                    nameAuthority: synonym.datasetName ?: datasetName ?: grailsApplication.config.synonymSourceAttribution,
+                    infoSourceURL: synonym.source ?: datasetURL,
+                    datasetURL: datasetURL
+                ]
+            },
+            commonNames: commonNames.collect { commonName ->
+                def datasetURL = getDataset(commonName.datasetID, datasetMap)?.guid
+                def datasetName = getDataset(commonName.datasetID, datasetMap)?.name
+                [
+                    nameString: commonName.name,
+                    status: commonName.status,
+                    priority: commonName.priority,
+                    language: commonName.language ?: grailsApplication.config.commonNameDefaultLanguage,
+                    infoSourceName: commonName.datasetName ?: datasetName ?: grailsApplication.config.commonNameSourceAttribution,
+                    infoSourceURL: commonName.source ?: datasetURL,
+                    datasetURL: datasetURL
+                ]
+            },
+            imageIdentifier: taxon.image,
+            conservationStatuses: conservationStatus,
+            extantStatuses: [],
+            habitats: [],
+            categories: [],
+            simpleProperties: [],
+            images: [],
+            identifiers: identifiers.collect { identifier ->
+                def datasetURL = getDataset(identifier.datasetID, datasetMap)?.guid
+                def datasetName = getDataset(identifier.datasetID, datasetMap)?.name
+                [
+                    identifier: identifier.guid,
+                    nameString: identifier.name,
+                    status: identifier.status,
+                    subject: identifier.subject,
+                    format: identifier.format,
+                    infoSourceName: identifier.datasetName ?: datasetName ?: grailsApplication.config.identifierSourceAttribution,
+                    infoSourceURL: identifier.source ?: datasetURL,
+                    datasetURL: datasetURL
+                ]
+            }
         ]
+
         if (taxon.taxonConceptID)
             model.taxonConcept["taxonConceptID"] = taxon.taxonConceptID
         if (taxon.scientificNameID)
@@ -867,7 +869,8 @@ class SearchService {
             model.taxonConcept["acceptedConceptID"] = taxon.acceptedConceptID
         if (taxon.acceptedConceptName)
             model.taxonConcept["acceptedConceptName"] = taxon.acceptedConceptName
-        model
+
+        return model
     }
 
     def serializeClassificationTaxon(taxon) {

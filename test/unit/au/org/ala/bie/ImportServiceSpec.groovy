@@ -28,7 +28,6 @@ class ImportServiceSpec extends Specification {
         grailsApplication.config.indexOfflineBaseUrl = "http://localhost:8983/solr/bie-offline"
         grailsApplication.config.biocache.solr.url = "http://ala-rufus.it.csiro.au/solr/biocache"
         grailsApplication.config.speciesList.url = "http://lists.ala.org.au/ws/speciesListItems/"
-        grailsApplication.config.speciesList.params = "?includeKVP=true"
         grailsApplication.config.imageLists = [
                 [ drUid: "dr4778", imageId: "imageId" ]
         ]

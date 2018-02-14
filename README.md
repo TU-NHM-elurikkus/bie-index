@@ -14,8 +14,8 @@ This includes:
 - CSV download services
 - bulk taxonomic lookup services by name or GUID
 - retrieval of full classification (major and non-major taxonomic ranks e.g. sub-order, sub-family)
- 
-This project provides JSON webservices and an interface for admin users. It does not include a HTML interface for end users. 
+
+This project provides JSON webservices and an interface for admin users. It does not include a HTML interface for end users.
 There is a set of front end components available providing the species pages listed here:
 
 - [bie-plugin](http://github.com/AtlasOfLivingAustralia/bie-plugin) - a grails plugin providing species pages & search interfaces
@@ -93,7 +93,7 @@ Below is an example meta.xml that would be provided in a darwin core archive.
     </files>
     <coreid index="0" />
     <field term="http://rs.tdwg.org/dwc/terms/taxonID"/>
-    <field index="1" term="http://rs.tdwg.org/dwc/terms/vernacularName"/>    
+    <field index="1" term="http://rs.tdwg.org/dwc/terms/vernacularName"/>
   </extension>
 </archive>
 ```
@@ -136,7 +136,7 @@ To allow encoded slashes in tomcat, start the server with `-Dorg.apache.tomcat.u
 An image scan will search the biocache for suitable images to act as an example image for the taxon.
 The image scan configuration can be located in `/data/bie-index/config/image-lists.json` and
 references by `imageListsUrl` in the configuration properties.
-An example image list configuration is 
+An example image list configuration is
 
 ```
 {
@@ -174,7 +174,7 @@ An example image list configuration is
 
 For each candidate taxon, a query is constructed that boosts certain characteristics of the occurrence in the
 hopes of finding something that doesn't look terribly dead. The `boosts` element contains the list of boosts to apply
-(in the example, observations and images get a boost, preserved specimens are downgraded and images from dr130 are 
+(in the example, observations and images get a boost, preserved specimens are downgraded and images from dr130 are
 preferred.
 
 Only certain ranks get images attached to them.
@@ -223,7 +223,7 @@ These can be overridden at the list level.
 Languages should be ISO-639 two- or three-letter codes; the bie-plugin can expand these out.
 The `uid` holds the list identifier to load.
 
-**Avoid using vernacularName or commonName as the vernacular name field** 
+**Avoid using vernacularName or commonName as the vernacular name field**
 The list server treats these in a special way, causing problems when attempting to retrieve the names.
 
 ## Conservation Status Lists
@@ -240,22 +240,25 @@ An example conservation status list configuration is
   "lists": [
     {
       "uid": "dr656",
-      "field": "conservationStatusAUS_s",
-      "term": "conservationStatusAUS",
-      "label": "AUS"
+      "field": "status",
+      "name": "My List"
     },
     {
       "uid": "dr655",
-      "field": "conservationStatusVIC_s",
-      "term": "conservationStatusVIC",
-      "label": "VIC",
-      "sourceField": "statusName"
+      "field": "status",
+      "name": "List 1"
     }
   ]
-}```
+}
+```
 
 The `uid` supplies the list identifier.
 The `field` supplies the solr field which will be used to store the conservation status.
-The `term` supplies the name of the status field.
-`label` gives the label to apply to the conservation status.
-`sourceField`
+The `name` supplies the name of of the species list.
+
+
+After conf is changed and the code has been built, you need to visit
+https://demo.elurikkus.ut.ee/bie-index/admin/import/importConservationSpeciesLists
+which will re-index the given lists information to taxa records in solr.
+
+Re-process and re-index occurrences after this

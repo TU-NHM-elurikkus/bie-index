@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 class ConservationListsSource {
     static log = LoggerFactory.getLogger(ConservationListsSource.class)
 
-    def defaultSourceField = 'status'
+    def defaultSourceField = "status"
     def lists = []
 
     ConservationListsSource(String url) {
@@ -24,12 +24,11 @@ class ConservationListsSource {
             log.info("Loading conservation lists from: " + url)
             JsonSlurper slurper = new JsonSlurper()
             def config = slurper.parse(new URL(url))
-            defaultSourceField = config?.defaultSourceField ?: 'status'
+            defaultSourceField = config?.defaultSourceField ?: "status"
             lists = config?.lists ?: []
             log.info("Loaded " + lists.size() + " lists")
         } catch (Exception ex) {
-            log.error("Unable to inifialise conservation status source from " + url, ex)
+            log.error("Unable to initialise conservation status source from " + url, ex)
         }
-
     }
 }

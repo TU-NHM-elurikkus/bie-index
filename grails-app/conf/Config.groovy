@@ -11,14 +11,14 @@ grails.config.locations = [
     "file:${default_config}"
 ]
 
-if(!new File(default_config).exists()) {
-    println "ERROR - [${appName}] No external configuration file defined. ${default_config}"
+if (!new File(default_config).exists()) {
+    println("ERROR [${appName}] - No external configuration file defined. ${default_config}")
 }
-if(!new File(commons_config).exists()) {
-    println "ERROR - [${appName}] No external commons configuration file defined. ${commons_config}"
+if (!new File(commons_config).exists()) {
+    println("ERROR [${appName}] - No external commons configuration file defined. ${commons_config}")
 }
 
-println "[${appName}] (*) grails.config.locations = ${grails.config.locations}"
+println("INFO [${appName}] - (*) grails.config.locations = ${grails.config.locations}")
 
 
 indexLiveBaseUrl = "http://localhost:8080/solr/bie"
@@ -42,7 +42,7 @@ synonymCheckingEnabled = true
 synonymSourceAttribution = "National Species Lists"
 gazetteerLayerId = "2123"
 if (!security.apikey.serviceUrl) {
-    security.apikey.serviceUrl = 'https://auth.ala.org.au/apikey/ws/check?apikey='
+    security.apikey.serviceUrl = "https://auth.ala.org.au/apikey/ws/check?apikey="
 }
 wordPress {
     sitemapUrl = "http://www.ala.org.au/sitemap.xml"
@@ -50,13 +50,21 @@ wordPress {
     excludedCategories = ["button"]
     contentOnlyParams = "?content-only=1&categories=1"
 }
-speciesList.url = "http://lists.ala.org.au/ws/speciesListItems/"
-speciesList.params = "?includeKVP=true"
+speciesList.url = "http://ala-test.ut.ee/lists/ws/speciesListItems/"
 // Acceptable vernacular names to appear in autocomplete
-//autoComplete.languages = 'en,en-AU,en-CA,en-GB,en-US'
-autoComplete.languages = ''
+//autoComplete.languages = "en,en-AU,en-CA,en-GB,en-US"
+autoComplete.languages = ""
+
 // Location of conservation lists
-conservationListsUrl = this.class.getResource("/default-conservation-lists.json").toString()
+conservation_list_config = "/data/bie-index/config/conservation-lists.json"
+if (new File(conservation_list_config).exists()) {
+    conservationListsUrl = "file:${conservation_list_config}"
+} else {
+    println("WARNING [${appName}] - Environment specifi config not found. Using default default-conservation-list.json file")
+    conservationListsUrl = this.class.getResource("/default-conservation-lists.json").toString()
+}
+
+
 // Location of vernacular name lists (null for default)
 vernacularListsUrl = this.class.getResource("/default-vernacular-lists.json").toString()
 // Location of image lists (null for default)
@@ -95,19 +103,31 @@ useLegacyAuto = false
 grails.mime.use.accept.header = true
 grails.mime.disable.accept.header.userAgents = []
 grails.mime.types = [ // the first one is the default format
-    all:           '*/*', // 'all' maps to '*' or the first available format in withFormat
-    atom:          'application/atom+xml',
-    css:           'text/css',
-    csv:           'text/csv',
-    form:          'application/x-www-form-urlencoded',
-    html:          ['text/html','application/xhtml+xml'],
-    js:            'text/javascript',
-    json:          ['application/json', 'text/json'],
-    multipartForm: 'multipart/form-data',
-    rss:           'application/rss+xml',
-    text:          'text/plain',
-    hal:           ['application/hal+json','application/hal+xml'],
-    xml:           ['text/xml', 'application/xml']
+    all: "*/*", // "all" maps to "*" or the first available format in withFormat
+    atom: "application/atom+xml",
+    css: "text/css",
+    csv: "text/csv",
+    form: "application/x-www-form-urlencoded",
+    html: [
+        "text/html",
+        "application/xhtml+xml"
+    ],
+    js: "text/javascript",
+    json: [
+        "application/json",
+        "text/json"
+    ],
+    multipartForm: "multipart/form-data",
+    rss: "application/rss+xml",
+    text: "text/plain",
+    hal: [
+        "application/hal+json",
+        "application/hal+xml"
+    ],
+    xml: [
+        "text/xml",
+        "application/xml"
+    ]
 ]
 
 // Legacy setting for codec used to encode data with ${}
@@ -115,29 +135,29 @@ grails.views.default.codec = "html"
 
 // The default scope for controllers. May be prototype, session or singleton.
 // If unspecified, controllers are prototype scoped.
-grails.controllers.defaultScope = 'singleton'
+grails.controllers.defaultScope = "singleton"
 
 // GSP settings
 grails {
     views {
         gsp {
-            encoding = 'UTF-8'
-            htmlcodec = 'xml' // use xml escaping instead of HTML4 escaping
+            encoding = "UTF-8"
+            htmlcodec = "xml" // use xml escaping instead of HTML4 escaping
             codecs {
-                expression = 'html' // escapes values inside ${}
-                scriptlet = 'html' // escapes output from scriptlets in GSPs
-                taglib = 'none' // escapes output from taglibs
-                staticparts = 'none' // escapes output from static template parts
+                expression = "html" // escapes values inside ${}
+                scriptlet = "html" // escapes output from scriptlets in GSPs
+                taglib = "none" // escapes output from taglibs
+                staticparts = "none" // escapes output from static template parts
             }
         }
         // escapes all not-encoded output at final stage of outputting
-        // filteringCodecForContentType.'text/html' = 'html'
+        // filteringCodecForContentType."text/html" = "html"
     }
 }
 
 grails.converters.encoding = "UTF-8"
 // scaffolding templates configuration
-grails.scaffolding.templates.domainSuffix = 'Instance'
+grails.scaffolding.templates.domainSuffix = "Instance"
 
 // Set to false to use the new Grails 1.2 JSONBuilder in the render method
 grails.json.legacy.builder = false
@@ -146,12 +166,12 @@ grails.enable.native2ascii = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 // whether to disable processing of multi part requests
-grails.web.disable.multipart=false
+grails.web.disable.multipart = false
 
 // request parameters to mask when logging exceptions
-grails.exceptionresolver.params.exclude = ['password']
+grails.exceptionresolver.params.exclude = ["password"]
 
-// configure auto-caching of queries by default (if false you can cache individual queries with 'cache: true')
+// configure auto-caching of queries by default (if false you can cache individual queries with "cache: true")
 grails.hibernate.cache.queries = false
 
 // configure passing transaction's read-only attribute to Hibernate session, queries and criterias
@@ -170,12 +190,12 @@ environments {
 }
 
 // log4j configuration
-def logging_dir = System.getProperty("catalina.base") ? System.getProperty("catalina.base") + "/logs"  : "/var/log/tomcat7"
-if(!new File(logging_dir).exists()) {
+def logging_dir = System.getProperty("catalina.base") ? System.getProperty("catalina.base") + "/logs" : "/var/log/tomcat7"
+if (!new File(logging_dir).exists()) {
     logging_dir = "/tmp"
 }
 
-println "INFO - [${appName}] logging_dir: ${logging_dir}"
+println("INFO [${appName}] - logging_dir: ${logging_dir}")
 
 log4j = {
     def logPattern = pattern(conversionPattern: "%d %-5p [%c{1}] %m%n")
@@ -183,7 +203,7 @@ log4j = {
     def tomcatLogAppender = rollingFile(
         name: "tomcatLog",
         maxFileSize: "10MB",
-        file: "${logging_dir}/specieslist.log",
+        file: "${logging_dir}/bie-index.log",
         threshold: org.apache.log4j.Level.WARN,
         layout: logPattern
     )
@@ -211,15 +231,19 @@ log4j = {
         info "stdout"
     }
 
-    error   'au.org.ala.cas.client',
-            "au.org.ala",
-            'grails.spring.BeanBuilder',
-            'grails.plugin.webxml',
-            'grails.plugin.cache.web.filter',
-            'grails.app.services.org.grails.plugin.resource',
-            'grails.app.taglib.org.grails.plugin.resource',
-            'grails.app.resourceMappers.org.grails.plugin.resource'
+    error(
+        "au.org.ala.cas.client",
+        "au.org.ala",
+        "grails.spring.BeanBuilder",
+        "grails.plugin.webxml",
+        "grails.plugin.cache.web.filter",
+        "grails.app.services.org.grails.plugin.resource",
+        "grails.app.taglib.org.grails.plugin.resource",
+        "grails.app.resourceMappers.org.grails.plugin.resource"
+    )
 
-    info    "grails.app",
-            "au.org.ala"
+    info(
+        "grails.app",
+        "au.org.ala"
+    )
 }

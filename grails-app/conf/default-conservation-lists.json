@@ -1,5 +1,20 @@
 {
-  "defaultSourceField": "status",
-  "lists": [
-  ]
+    "defaultSourceField": "status",
+    "lists": [
+        {
+            "uid": "drt5047337511",
+            "field": "status",
+            "name": "Category I"
+        },
+        {
+            "uid": "drt722705174",
+            "field": "status",
+            "name": "Category II"
+        },
+        {
+            "uid": "drt5460362684",
+            "field": "status",
+            "name": "Category III"
+        }
+    ]
 }
