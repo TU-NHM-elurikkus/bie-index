@@ -73,6 +73,21 @@ class SearchService {
                 results: formatDocs(json.response.docs, null, null)
         ]
     }
+
+    private transformImageUrl(String imageUrl) {
+        def image = imageUrl.replaceFirst("^/data", "")
+        def extIndex = image.lastIndexOf(".")
+        def imageName = image
+        def ext = ""
+
+        if(extIndex != -1) {
+            imageName = imageName.substring(0, extIndex)
+            ext = image.substring(extIndex)
+        }
+
+        return [imageName, ext]
+    }
+
     /**
      * Retrieve species & subspecies for the supplied taxon which have images.
      *
@@ -90,14 +105,17 @@ class SearchService {
         if (!taxon.image || taxon.image.isEmpty()) {
             return null
         }
+
+        def (imageName, ext) = transformImageUrl(taxon.image)
+
         if (type == 'thumbnail') {
-            return grailsApplication.config.imageThumbnailUrl + taxon.image
+            return "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}"
         } else if (type == 'small') {
-            return grailsApplication.config.imageSmallUrl + taxon.image
+            return "${grailsApplication.config.mediaUrl}${imageName}__small${ext}"
         } else if (type == 'large') {
-            return grailsApplication.config.imageLargeUrl + taxon.image
+            return "${grailsApplication.config.mediaUrl}${imageName}__large${ext}"
         } else {
-            return grailsApplication.config.imageLargeUrl + taxon.image
+            return "${grailsApplication.config.mediaUrl}${imageName}${ext}"
         }
     }
 
@@ -590,8 +608,11 @@ class SearchService {
         def json = js.parseText(queryResponse)
         def model = [:]
 
-        if (json.response.numFound > 0) {
+        println "HERE"
+
+        if(json.response.numFound > 0) {
             def result = json.response.docs[0]
+
             //json.response.docs.each { result ->
                 model = [
                         "identifier": result.guid,
@@ -607,10 +628,10 @@ class SearchService {
                         "acceptedConceptName": result.acceptedConceptName ?: result.scientificName,
                         "taxonomicStatus": result.taxonomicStatus,
                         "imageId": result.image,
-                        "imageUrl": (result.image) ? grailsApplication.config.imageLargeUrl + result.image : "",
-                        "thumbnailUrl": (result.image) ? grailsApplication.config.imageThumbnailUrl + result.image : "",
-                        "largeImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
-                        "smallImageUrl": (result.image) ? grailsApplication.config.imageSmallUrl + result.image : "",
+                        "imageUrl": "",
+                        "thumbnailUrl": "",
+                        "smallImageUrl": "",
+                        "largeImageUrl": "",
                         "imageMetadataUrl": (result.image) ? grailsApplication.config.imageMetaDataUrl + result.image : "",
                         "kingdom": result.rk_kingdom,
                         "phylum": result.rk_phylum,
@@ -622,8 +643,18 @@ class SearchService {
                         "linkIdentifier": result.linkIdentifier
                 ]
 
+                if(result.image) {
+                    def (imageName, ext) = transformImageUrl(result.image)
+
+                    model.put("imageUrl", "${grailsApplication.config.mediaUrl}${image}")
+                    model.put("thumbnailUrl", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
+                    model.put("smallImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__small${ext}")
+                    model.put("largeImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
+                }
+
         }
 
+        println model
         model
     }
 
@@ -652,8 +683,10 @@ class SearchService {
         }
 
         if(taxon.image){
-            model.put("thumbnail", grailsApplication.config.imageThumbnailUrl + taxon.image)
-            model.put("imageURL", grailsApplication.config.imageLargeUrl + taxon.image)
+            def (imageName, ext) = transformImageUrl(taxon.image)
+
+            model.put("thumbnail", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
+            model.put("imageURL", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
         }
         model
     }
@@ -714,9 +747,11 @@ class SearchService {
                        datasetID: doc.datasetID
                ]
                if(doc.image){
-                   taxon.put("thumbnailUrl", grailsApplication.config.imageThumbnailUrl + doc.image)
-                   taxon.put("smallImageUrl", grailsApplication.config.imageSmallUrl + doc.image)
-                   taxon.put("largeImageUrl", grailsApplication.config.imageLargeUrl + doc.image)
+                   def (imageName, ext) = transformImageUrl(doc.image)
+
+                   taxon.put("thumbnailUrl", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
+                   taxon.put("smallImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__small${ext}")
+                   taxon.put("largeImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
                }
                 if (doc.linkIdentifier)
                     taxon.put("linkIdentifier", doc.linkIdentifier)
@@ -1067,21 +1102,13 @@ class SearchService {
                 }
 
                 if(it.image){
-                    def image = it.image.replaceFirst("^/data", "")
-                    def extIndex = image.lastIndexOf(".")
-                    def imageName = image
-                    def ext = ""
+                    def (imageName, ext) = transformImageUrl(it.image)
 
-                    if(extIndex != -1) {
-                        imageName = image.substring(0, extIndex)
-                        ext = image.substring(extIndex)
-                    }
-
-                    doc.put("image", it.image)
-                    doc.put("imageUrl", "${grailsApplication.config.imageLargeUrl}${image}")
-                    doc.put("thumbnailUrl", "${grailsApplication.config.imageThumbnailUrl}${imageName}__thumb${ext}")
-                    doc.put("smallImageUrl", "${grailsApplication.config.imageSmallUrl}${imageName}__small${ext}")
-                    doc.put("largeImageUrl", "${grailsApplication.config.imageLargeUrl}${imageName}__large${ext}")
+                    doc.put("image", "${grailsApplication.config.mediaUrl}${image}")
+                    doc.put("imageUrl", "${grailsApplication.config.mediaUrl}${image}")
+                    doc.put("thumbnailUrl", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
+                    doc.put("smallImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__small${ext}")
+                    doc.put("largeImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
                 }
 
                 if(getAdditionalResultFields()){
