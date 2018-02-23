@@ -644,7 +644,7 @@ class SearchService {
                 if(result.image) {
                     def (imageName, ext) = transformImageUrl(result.image)
 
-                    model.put("imageUrl", "${grailsApplication.config.mediaUrl}${image}")
+                    model.put("imageUrl", "${grailsApplication.config.mediaUrl}${imageName}${ext}")
                     model.put("thumbnailUrl", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
                     model.put("smallImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__small${ext}")
                     model.put("largeImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
@@ -1101,8 +1101,8 @@ class SearchService {
                 if(it.image){
                     def (imageName, ext) = transformImageUrl(it.image)
 
-                    doc.put("image", "${grailsApplication.config.mediaUrl}${image}")
-                    doc.put("imageUrl", "${grailsApplication.config.mediaUrl}${image}")
+                    doc.put("image", "${grailsApplication.config.mediaUrl}${imageName}${ext}")
+                    doc.put("imageUrl", "${grailsApplication.config.mediaUrl}${imageName}${ext}")
                     doc.put("thumbnailUrl", "${grailsApplication.config.mediaUrl}${imageName}__thumb${ext}")
                     doc.put("smallImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__small${ext}")
                     doc.put("largeImageUrl", "${grailsApplication.config.mediaUrl}${imageName}__large${ext}")
