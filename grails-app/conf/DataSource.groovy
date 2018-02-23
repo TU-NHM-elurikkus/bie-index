@@ -2,8 +2,6 @@ dataSource {
     pooled = true
     driverClassName = "com.mysql.jdbc.Driver"
     dialect = org.hibernate.dialect.MySQL5InnoDBDialect
-    username = "collectory"
-    password = "password"
     logSql = false
     dbCreate = "update"
     url = "jdbc:mysql://localhost:3306/collectory"
