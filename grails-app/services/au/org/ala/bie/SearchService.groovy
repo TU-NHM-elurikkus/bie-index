@@ -608,8 +608,6 @@ class SearchService {
         def json = js.parseText(queryResponse)
         def model = [:]
 
-        println "HERE"
-
         if(json.response.numFound > 0) {
             def result = json.response.docs[0]
 
@@ -654,7 +652,6 @@ class SearchService {
 
         }
 
-        println model
         model
     }
 
