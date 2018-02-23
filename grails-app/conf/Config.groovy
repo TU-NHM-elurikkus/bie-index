@@ -31,13 +31,11 @@ commonNameDefaultLanguage = "et"
 identifierSourceAttribution = "National Species Lists"
 indexImages = true
 importDir = "/data/bie/import"
-collectoryBaseUrl = "http://collections.ala.org.au"
-collectoryServicesUrl = "http://collections.ala.org.au/ws"
-layersServicesUrl = "http://spatial.ala.org.au/ws"
-imageThumbnailUrl = "http://images.ala.org.au/image/proxyImageThumbnail?imageId="
-imageLargeUrl = "http://images.ala.org.au/image/proxyImage?imageId="
-imageSmallUrl = "http://images.ala.org.au/image/proxyImageThumbnailLarge?imageId="
-imageMetaDataUrl = "http://images.ala.org.au/ws/image/"
+collectoryBaseUrl = "http://localhost:8080/collectory"
+collectoryServicesUrl = "http://localhost:8080/collectory/ws"
+layersServicesUrl = "http://localhost:8080/layers-service/ws"
+mediaUrl = "http://localhost:8080"
+imageMetaDataUrl = "http://localhost:8080/images/ws/image/"
 synonymCheckingEnabled = true
 synonymSourceAttribution = "National Species Lists"
 gazetteerLayerId = "2123"
@@ -50,7 +48,8 @@ wordPress {
     excludedCategories = ["button"]
     contentOnlyParams = "?content-only=1&categories=1"
 }
-speciesList.url = "http://lists.ala.org.au/ws/speciesListItems/"
+
+speciesList.url = "http://localhost:8080/lists/ws/speciesListItems/"
 speciesList.params = "?includeKVP=true"
 // Acceptable vernacular names to appear in autocomplete
 //autoComplete.languages = 'en,en-AU,en-CA,en-GB,en-US'
