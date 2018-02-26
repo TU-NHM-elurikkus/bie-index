@@ -1388,7 +1388,7 @@ class ImportService {
 
         def boosts = grailsApplication.config.imageBoosts
             .split(",")
-            .collect({ bq -> "bq=${bq}" })
+            .collect({ bq -> "bq=${bq}^200" })
             .join("&");
 
         def lastImage = [imageId: "none", taxonID: "none", name: "none"]
