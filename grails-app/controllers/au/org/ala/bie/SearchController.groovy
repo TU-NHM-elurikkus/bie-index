@@ -185,7 +185,10 @@ class SearchController {
      * @return
      */
     def auto() {
-        def fqString = ""
+        def fqString = params.get("fq", "")
+        if(fqString) {
+            fqString = "&fq=${fqString}"
+        }
         def limit = params.limit
         def idxType = params.idxType
         def geoOnly = params.geoOnly
@@ -201,6 +204,8 @@ class SearchController {
         if (geoOnly) {
             // TODO needs WS lookup to biocache-service (?)
         }
+
+        println "q: ${params.q} | fq: ${fqString}"
 
         def autoCompleteList = autoCompleteService.auto(params.q, fqString)
         def payload = [autoCompleteList:autoCompleteList]
