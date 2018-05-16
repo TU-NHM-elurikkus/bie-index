@@ -205,8 +205,6 @@ class SearchController {
             // TODO needs WS lookup to biocache-service (?)
         }
 
-        println "q: ${params.q} | fq: ${fqString}"
-
         def autoCompleteList = autoCompleteService.auto(params.q, fqString)
         def payload = [autoCompleteList:autoCompleteList]
         asJson payload
