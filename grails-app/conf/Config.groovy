@@ -182,7 +182,7 @@ log4j = {
     def tomcatLogAppender = rollingFile(
         name: "tomcatLog",
         maxFileSize: "10MB",
-        file: "${logging_dir}/specieslist.log",
+        file: "${logging_dir}/bie-index.log",
         threshold: org.apache.log4j.Level.WARN,
         layout: logPattern
     )

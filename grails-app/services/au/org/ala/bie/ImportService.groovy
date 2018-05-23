@@ -1115,6 +1115,7 @@ class ImportService {
             doc["nameComplete"] = buildNameComplete(nameComplete, scientificName, scientificNameAuthorship)
             doc["nameFormatted"] = buildNameFormatted(nameFormatted, nameComplete, scientificName, scientificNameAuthorship, taxonRank, taxonRanks)
             doc["taxonomicStatus"] = taxonomicStatus
+            doc["locatedInHubCountry"] = core.value(ALATerm.locatedInHubCountry).toBoolean()
 
             //index additional fields that are supplied in the core record
             core.terms().each { term ->

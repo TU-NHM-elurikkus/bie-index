@@ -11,6 +11,7 @@ enum ALATerm implements Term {
     nameComplete,
     nameFormatted,
     nameID,
+    locatedInHubCountry,
     status;
 
     static NS = "http://ala.org.au/terms/1.0/"
