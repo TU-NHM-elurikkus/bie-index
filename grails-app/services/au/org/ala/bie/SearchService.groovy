@@ -211,14 +211,14 @@ class SearchService {
                     js = new JsonSlurper()
                     json = js.parseText(queryResponse)
                 }
-            } catch(Exception e){
+            } catch(Exception e) {
                 //expected behaviour for non scientific name matches
                 log.debug "expected behaviour for non scientific name matches: ${e}"
             }
         }
 
         def matcher = ( queryTitle =~ /(rkid_)([a-z]{1,})(:)(.*)/ )
-        if(matcher.matches()){
+        if(matcher.matches()) {
             try {
                 def rankName = matcher[0][2]
                 def guid = matcher[0][4]

@@ -225,9 +225,13 @@ class SearchController {
                 }
             }
             asJson([searchResults: searchService.search(params.q, params, facets)])
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e)
-            render(["error": e.getMessage(), indexServer: grailsApplication.config.indexLiveBaseUrl] as JSON)
+            def errorMsg = e.getMessage()
+            if(errorMsg == null && e.getCause() != null) {
+                errorMsg = e.getCause().getMessage()
+            }
+            render(["error": errorMsg, indexServer: grailsApplication.config.indexLiveBaseUrl] as JSON)
         }
     }
 
