@@ -1172,19 +1172,29 @@ class ImportService {
         if (archiveFile.rowType != GbifTerm.VernacularName)
             throw new IllegalArgumentException("Vernacular import only works for files of type " + GbifTerm.VernacularName + " got " + archiveFile.rowType)
         log("Importing vernacular names")
+
         def statusMap = vernacularNameStatus()
         def defaultStatus = statusMap.get("common")
+        def preferredStatus = statusMap.get("preferred")
+
         String defaultLanguage = grailsApplication.config.commonNameDefaultLanguage
+        String preferredLanguage = grailsApplication.config.commonNamePreferredLanguage;
+
         def buffer = []
         def count = 0
+
         for (Record record: archiveFile) {
             String taxonID = record.id()
             String vernacularName = record.value(DwcTerm.vernacularName)
             String nameID = record.value(ALATerm.nameID)
-            Object status = statusMap.get(record.value(ALATerm.status))
             String language = record.value(DcTerm.language) ?: defaultLanguage
             String source = record.value(DcTerm.source)
             String datasetID = record.value(DwcTerm.datasetID)
+
+            // Prefer local common names
+            Object status = language == preferredLanguage ?
+                preferredStatus :
+                statusMap.get(record.value(ALATerm.status))
 
             def doc = [:]
             doc["id"] = UUID.randomUUID().toString() // doc key
