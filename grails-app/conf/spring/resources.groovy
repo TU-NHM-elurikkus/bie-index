@@ -5,7 +5,7 @@ import au.org.ala.bie.util.ConservationListsSource
 // Place your Spring DSL code here
 beans = {
     liveSolrClient(HttpSolrClient, application.config.indexLiveBaseUrl)
-    offlineSolrClient(ConcurrentUpdateSolrClient, application.config.indexOfflineBaseUrl, 10, 4)
+    offlineSolrClient(ConcurrentUpdateSolrClient, application.config.indexOfflineBaseUrl, 100, 4)
     updatingLiveSolrClient(ConcurrentUpdateSolrClient, application.config.indexLiveBaseUrl, 10, 4)
     conservationListsSource(ConservationListsSource, application.config.conservationListsUrl)
 }

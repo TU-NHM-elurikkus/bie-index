@@ -170,7 +170,8 @@ environments {
 }
 
 // log4j configuration
-def logging_dir = System.getProperty("catalina.base") ? System.getProperty("catalina.base") + "/logs"  : "/var/log/tomcat7"
+def catalinaBase = System.getProperty("catalina.base")
+def logging_dir = catalinaBase ? "${catalinaBase}/logs" : "/var/log/tomcat7"
 if(!new File(logging_dir).exists()) {
     logging_dir = "/tmp"
 }
@@ -184,7 +185,7 @@ log4j = {
         name: "tomcatLog",
         maxFileSize: "10MB",
         file: "${logging_dir}/bie-index.log",
-        threshold: org.apache.log4j.Level.WARN,
+        threshold: org.apache.log4j.Level.INFO,
         layout: logPattern
     )
 
@@ -197,29 +198,27 @@ log4j = {
                 appender(tomcatLogAppender)
             }
             development {
-                console(
-                    name: "stdout",
-                    layout: logPattern,
-                    threshold: org.apache.log4j.Level.DEBUG)
+                appender(tomcatLogAppender)
             }
         }
     }
 
     root {
-        error "tomcatLog"
-        warn "tomcatLog"
-        info "stdout"
+        info("tomcatLog", "stdout")
     }
 
-    error   'au.org.ala.cas.client',
-            "au.org.ala",
-            'grails.spring.BeanBuilder',
-            'grails.plugin.webxml',
-            'grails.plugin.cache.web.filter',
-            'grails.app.services.org.grails.plugin.resource',
-            'grails.app.taglib.org.grails.plugin.resource',
-            'grails.app.resourceMappers.org.grails.plugin.resource'
+    error(
+        "au.org.ala.cas.client",
+        "grails.spring.BeanBuilder",
+        "grails.plugin.webxml",
+        "grails.plugin.cache.web.filter",
+        "grails.app.services.org.grails.plugin.resource",
+        "grails.app.taglib.org.grails.plugin.resource",
+        "grails.app.resourceMappers.org.grails.plugin.resource"
+    )
 
-    info    "grails.app",
-            "au.org.ala"
+    info(
+        "grails.app",
+        "au.org.ala"
+    )
 }

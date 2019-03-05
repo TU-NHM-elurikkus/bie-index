@@ -36,12 +36,8 @@ class UrlMappings {
 
         "/ranks"(controller: "import", action: "ranks")
 
-        "/admin"(controller: "admin")
-        "/admin/"(controller: "admin")
         "/admin/indexFields(.$format)?"(controller: "misc", action: "indexFields")
         "/indexFields(.$format)?"(controller: "misc", action: "indexFields")
-
-        "/admin/import/$action?/$id?(.$format)?"(controller: "import")
 
         "/ws/subgroups(.json)?"(controller: "misc", action: "speciesGroups")
         "/subgroups.json"(controller: "misc", action: "speciesGroups")

@@ -1682,19 +1682,19 @@ class ImportService {
         Set autoLanguages = grailsApplication.config.autoComplete.languages ? grailsApplication.config.autoComplete.languages.split(',') as Set : null
 
         js.setType(JsonParserType.INDEX_OVERLAY)
-        log("Getting species groups")
+        log.info("Getting species groups")
         def speciesGroupMapper = speciesGroupService.invertedSpeciesGroups
-        log("Starting denormalisation scan for ${online ? 'online' : 'offline'} index")
-        log("Clearing existing denormalisations")
+        log.info("Starting denormalisation scan for ${online ? 'online' : 'offline'} index")
+        log.info("Clearing existing denormalisations")
         try {
             startTime = System.currentTimeMillis()
 
-            def solrServerUrl = baseUrl + "/select?wt=json&q=denormalised_b:true&rows=1"
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&rows=1"
             def queryResponse = solrServerUrl.toURL().getText("UTF-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                solrServerUrl = baseUrl + "/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
                 queryResponse = solrServerUrl.toURL().getText("UTF-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
@@ -1720,33 +1720,33 @@ class ImportService {
                     indexService.indexBatch(buffer, online)
                 if (total > 0) {
                     def percentage = Math.round((processed / total) * 100 )
-                    log("Cleared ${processed} taxa (${percentage}%)")
+                    log.info("Cleared ${processed} taxa (${percentage}%)")
                 }
                 prevCursor = cursor
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log("Exception clearing denormalisation entries: ${ex.getMessage()}")
+            log.info("Exception clearing denormalisation entries: ${ex.getMessage()}")
             log.error("Unable to clear denormalisations", ex)
         }
-        log("Denormalising top-level taxa")
+        log.info("Denormalising top-level taxa")
         try {
             processed = 0
             prevCursor = ""
             cursor = "*"
             def typeQuery = "idxtype:\"" + IndexDocType.TAXON.name() + "\"+AND+-acceptedConceptID:*+AND+-parentGuid:*"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${typeQuery}&rows=1"
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&rows=1"
             def queryResponse = solrServerUrl.toURL().getText("UTF-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
                 //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
                 queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
-                log "1. Paging over ${total} docs - page ${(processed + 1)}"
+                log.info("1. Paging over ${total} docs - page ${(processed + 1)}")
 
                 docs.each { doc ->
                     denormaliseEntry(doc, [:], [], [], buffer, bufferLimit, pageSize, online, js, speciesGroupMapper, autoLanguages)
@@ -1765,7 +1765,7 @@ class ImportService {
             log("Exception denormalising top-level: ${ex.getMessage()}")
             log.error("Unable to denormalise", ex)
         }
-        log("Denormalising dangling taxa")
+        log.info("Denormalising dangling taxa")
         try {
             processed++
             prevCursor = ""
@@ -1782,7 +1782,7 @@ class ImportService {
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
-                log "2. Paging over ${total} docs - page ${(processed + 1)}"
+                log.info("2. Paging over ${total} docs - page ${(processed + 1)}")
 
                 docs.each { doc ->
                     denormaliseEntry(doc, [:], [], [], buffer, bufferLimit, pageSize, online, js, speciesGroupMapper, autoLanguages)
@@ -1792,33 +1792,33 @@ class ImportService {
                     indexService.indexBatch(buffer, online)
                 if (total > 0 && processed % 1000 == 0) {
                     def percentage = Math.round(processed * 100 / total)
-                    log("Denormalised ${processed} dangling taxa (${percentage}%)")
+                    log.info("Denormalised ${processed} dangling taxa (${percentage}%)")
                 }
                 prevCursor = cursor
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log("Exception denormalising dangling taxa: ${ex.getMessage()}")
+            log.info("Exception denormalising dangling taxa: ${ex.getMessage()}")
             log.error("Unable to denormalise", ex)
         }
-        log("Denormalising synonyms")
+        log.info("Denormalising synonyms")
         try {
             processed = 0
             prevCursor = ""
             cursor = "*"
             def synonymQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+acceptedConceptID:*"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${synonymQuery}&rows=1"
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&rows=1"
             def queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
                 //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
                 queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
-                log "3. Paging over ${total} docs - page ${(processed + 1)}"
+                log.info("3. Paging over ${total} docs - page ${(processed + 1)}")
 
                 docs.each { doc ->
                     def accepted = searchService.lookupTaxon(doc.acceptedConceptID, !online)
@@ -1838,7 +1838,7 @@ class ImportService {
                     }
                     if (total > 0 && processed % 1000 == 0) {
                         def percentage = Math.round(processed * 100 / total)
-                        log("Denormalised ${processed} synonyms (${percentage}%)")
+                        log.info("Denormalised ${processed} synonyms (${percentage}%)")
                     }
                 }
                 if (!buffer.isEmpty())
@@ -1847,11 +1847,11 @@ class ImportService {
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log("Exception denormalising dangling taxa: ${ex.getMessage()}")
+            log.info("Exception denormalising dangling taxa: ${ex.getMessage()}")
             log.error("Unable to denormalise", ex)
         }
         endTime = System.currentTimeMillis()
-        log("Finished taxon denormalisaion. Duration: ${(new SimpleDateFormat("mm:ss:SSS")).format(new Date(endTime - startTime))}")
+        log.info("Finished taxon denormalisaion. Duration: ${(new SimpleDateFormat("mm:ss.SSS")).format(new Date(endTime - startTime))}")
     }
 
     private denormaliseEntry(doc, Map trace, List speciesGroups, List speciesSubGroups, List buffer, int bufferLimit, int pageSize, boolean online, JsonSlurper js, Map speciesGroupMapping, Set autoLanguages) {
