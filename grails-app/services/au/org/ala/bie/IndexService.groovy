@@ -62,8 +62,12 @@ class IndexService {
         client.add(buffer)
         log.debug "Doing SOLR commit for ${buffer.size()} docs"
         //commit
-        client.commit(true, false, true)
-
+        try {
+            client.commit(true, false, true)
+        } catch(ex) {
+            log.error(ex.printStackTrace());
+            throw ex;
+        }
     }
 
     public Set<IndexFieldDTO> getIndexFieldDetails(String... fields) throws Exception {
