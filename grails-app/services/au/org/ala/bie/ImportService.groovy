@@ -1688,14 +1688,13 @@ class ImportService {
         log.info("Clearing existing denormalisations")
         try {
             startTime = System.currentTimeMillis()
-
-            def solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&rows=1"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=denormalised_b:true&rows=1")
+            def queryResponse = new URL(solrServerUrl).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = solrServerUrl.toURL().getText("UTF-8")
+                solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}")
+                queryResponse = new URL(solrServerUrl).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1726,23 +1725,24 @@ class ImportService {
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log.info("Exception clearing denormalisation entries: ${ex.getMessage()}")
-            log.error("Unable to clear denormalisations", ex)
+            log.error("Exception clearing denormalisation entries: ")
+            log.error(ex.printStackTrace())
+            throw ex
         }
+
         log.info("Denormalising top-level taxa")
         try {
             processed = 0
             prevCursor = ""
             cursor = "*"
-            def typeQuery = "idxtype:\"" + IndexDocType.TAXON.name() + "\"+AND+-acceptedConceptID:*+AND+-parentGuid:*"
-            def solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&rows=1"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def typeQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+-acceptedConceptID:*+AND+-parentGuid:*"
+            def solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${typeQuery}&rows=1")
+            def queryResponse = new URL(solrServerUrl).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                //startTime = System.currentTimeMillis()
-                solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}")
+                queryResponse = new URL(solrServerUrl).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1756,29 +1756,30 @@ class ImportService {
                     indexService.indexBatch(buffer, online)
                 if (total > 0 && processed % 1000 == 0) {
                     def percentage = Math.round(processed * 100 / total)
-                    log("Denormalised ${processed} top-level taxa (${percentage}%)")
+                    log.info("Denormalised ${processed} top-level taxa (${percentage}%)")
                 }
                 prevCursor = cursor
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log("Exception denormalising top-level: ${ex.getMessage()}")
-            log.error("Unable to denormalise", ex)
+            log.error("Exception denormalising top-level: ")
+            log.error(ex.printStackTrace());
+            throw ex
         }
+
         log.info("Denormalising dangling taxa")
         try {
             processed++
             prevCursor = ""
             cursor = "*"
-            def danglingQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND++-acceptedConceptID:*+AND+-denormalised_s:yes"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${danglingQuery}&rows=1"
-            def queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+            def danglingQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+-acceptedConceptID:*+AND+-denormalised_s:yes"
+            def solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${danglingQuery}&rows=1")
+            def queryResponse = new URL(solrServerUrl).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${danglingQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${danglingQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}")
+                queryResponse = new URL(solrServerUrl).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1798,23 +1799,25 @@ class ImportService {
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log.info("Exception denormalising dangling taxa: ${ex.getMessage()}")
-            log.error("Unable to denormalise", ex)
+            log.error("Exception denormalising dangling taxa: ")
+            log.error(ex.printStackTrace())
+            throw ex
         }
+
         log.info("Denormalising synonyms")
         try {
             processed = 0
             prevCursor = ""
             cursor = "*"
             def synonymQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+acceptedConceptID:*"
-            def solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&rows=1"
-            def queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+            def solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${synonymQuery}&rows=1")
+            def queryResponse = new URL(solrServerUrl).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                //startTime = System.currentTimeMillis()
-                solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}")
+                queryResponse = new URL(solrServerUrl).getText("utf-8")
+
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1847,8 +1850,9 @@ class ImportService {
                 cursor = json.nextCursorMark
             }
         } catch (Exception ex) {
-            log.info("Exception denormalising dangling taxa: ${ex.getMessage()}")
-            log.error("Unable to denormalise", ex)
+            log.error("Exception denormalising dangling taxa: ")
+            log.error(ex.printStackTrace())
+            throw ex
         }
         endTime = System.currentTimeMillis()
         log.info("Finished taxon denormalisaion. Duration: ${(new SimpleDateFormat("mm:ss.SSS")).format(new Date(endTime - startTime))}")
@@ -1913,8 +1917,8 @@ class ImportService {
         while (cursor != prevCursor) {
             def encGuid = UriUtils.encodeQueryParam(doc.guid, 'UTF-8')
             def parentQuery = "idxtype:%22${IndexDocType.TAXON.name()}%22+AND+taxonomicStatus:accepted+AND+parentGuid:%22${encGuid}%22"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${parentQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def solrServerUrl = Encoder.encodeUrl("${baseUrl}/select?wt=json&q=${parentQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}")
+            def queryResponse = new URL(solrServerUrl).getText("utf-8")
             def json = js.parseText(queryResponse)
             def docs = json.response.docs
             docs.each { child ->

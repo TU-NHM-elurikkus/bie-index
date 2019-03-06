@@ -204,7 +204,7 @@ log4j = {
     }
 
     root {
-        info("tomcatLog", "stdout")
+        info("tomcatLog")
     }
 
     error(
