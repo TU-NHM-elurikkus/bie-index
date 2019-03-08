@@ -460,12 +460,12 @@ class SolrSearchService {
                 author: (String) doc.getFirstValue("scientificNameAuthorship"),
                 nameComplete: (String) doc.getFirstValue("nameComplete"),
                 conservationStatus: conservationStatus,
-                kingdom: (String) doc.getFirstValue("rk_kingdom"),
-                phylum: (String) doc.getFirstValue("rk_phylum"),
-                classs: (String) doc.getFirstValue("rk_class"),
-                order: (String) doc.getFirstValue("rk_order"),
-                family: (String) doc.getFirstValue("rk_family"),
-                genus: (String) doc.getFirstValue("rk_genus")
+                kingdom: (String) doc.getFirstValue("kingdom"),
+                phylum: (String) doc.getFirstValue("phylum"),
+                classs: (String) doc.getFirstValue("class"),
+                order: (String) doc.getFirstValue("order"),
+                family: (String) doc.getFirstValue("family"),
+                genus: (String) doc.getFirstValue("genus")
         )
         try {
             taxonConcept.linkIdentifier = URLEncoder.encode((String) doc.getFirstValue("linkIdentifier"), "UTF-8")

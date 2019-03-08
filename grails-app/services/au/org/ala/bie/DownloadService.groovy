@@ -31,7 +31,7 @@ class DownloadService {
     def download(params, OutputStream outputStream, Locale locale){
         def q = params.q ?: "*:*"
         def fq = ""
-        def fields = grailsApplication.config.defaultDownloadFields?:"guid,rank,scientificName,rk_genus,rk_family,rk_order,rk_class,rk_phylum,rk_kingdom,datasetName"
+        def fields = grailsApplication.config.defaultDownloadFields
 
         if (params.fields) {
             fields = params.fields

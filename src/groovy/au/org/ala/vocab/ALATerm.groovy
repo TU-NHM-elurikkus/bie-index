@@ -12,7 +12,9 @@ enum ALATerm implements Term {
     nameFormatted,
     nameID,
     locatedInHubCountry,
-    status;
+    status,
+
+    kingdomID, phylumID, classID, orderID, familyID, genusID, speciesID;
 
     static NS = "http://ala.org.au/terms/1.0/"
     static PREFIX = "ala:"

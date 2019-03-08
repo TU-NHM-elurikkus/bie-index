@@ -58,15 +58,14 @@ class IndexService {
             buffer << solrDoc
         }
 
-        //add
-        client.add(buffer)
-        log.debug "Doing SOLR commit for ${buffer.size()} docs"
-        //commit
-        try {
-            client.commit(true, false, true)
-        } catch(ex) {
-            log.error(ex.printStackTrace());
-            throw ex;
+        if (buffer) {
+            client.add(buffer)
+            try {
+                client.commit(true, false, true)
+            } catch(ex) {
+                log.error(ex.printStackTrace());
+                throw ex;
+            }
         }
     }
 

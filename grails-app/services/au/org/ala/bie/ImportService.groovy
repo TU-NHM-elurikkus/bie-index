@@ -15,7 +15,6 @@ package au.org.ala.bie
 
 import au.com.bytecode.opencsv.CSVReader
 import au.org.ala.bie.search.IndexDocType
-import au.org.ala.bie.indexing.RankedName
 import au.org.ala.bie.util.Encoder
 import au.org.ala.vocab.ALATerm
 import grails.async.PromiseList
@@ -58,7 +57,8 @@ class ImportService {
             DwcTerm.establishmentMeans, DwcTerm.taxonomicStatus, DwcTerm.taxonConceptID, DwcTerm.nomenclaturalStatus,
             DwcTerm.scientificNameID, DwcTerm.namePublishedIn, DwcTerm.namePublishedInID, DwcTerm.namePublishedInYear,
             DcTerm.source, DcTerm.language, DcTerm.license, DcTerm.format, DcTerm.rights, DcTerm.rightsHolder,
-            ALATerm.status, ALATerm.nameID
+            ALATerm.status, ALATerm.nameID, ALATerm.kingdomID, ALATerm.phylumID, ALATerm.classID, ALATerm.orderID,
+            ALATerm.familyID, ALATerm.genusID, ALATerm.speciesID
     ]
 
     def indexService, searchService
@@ -1074,6 +1074,9 @@ class ImportService {
                 DwcTerm.taxonomicStatus,
                 ALATerm.nameComplete,
                 ALATerm.nameFormatted,
+
+                ALATerm.kingdomID, ALATerm.phylumID, ALATerm.classID, ALATerm.orderID,
+                ALATerm.familyID, ALATerm.genusID, ALATerm.speciesID,
         ]
 
         def buffer = []
@@ -1116,6 +1119,15 @@ class ImportService {
             doc["nameFormatted"] = buildNameFormatted(nameFormatted, nameComplete, scientificName, scientificNameAuthorship, taxonRank, taxonRanks)
             doc["taxonomicStatus"] = taxonomicStatus
             doc["locatedInHubCountry"] = core.value(ALATerm.locatedInHubCountry).toBoolean()
+
+            // Add taxon hierarchy/lineage information
+            doc["rkid_kingdom"] = core.value(ALATerm.kingdomID)
+            doc["rkid_phylum"] = core.value(ALATerm.phylumID)
+            doc["rkid_class"] = core.value(ALATerm.classID)
+            doc["rkid_order"] = core.value(ALATerm.orderID)
+            doc["rkid_family"] = core.value(ALATerm.familyID)
+            doc["rkid_genus"] = core.value(ALATerm.genusID)
+            doc["rkid_species"] = core.value(ALATerm.speciesID)
 
             //index additional fields that are supplied in the core record
             core.terms().each { term ->
@@ -1283,11 +1295,6 @@ class ImportService {
         }
     }
 
-
-    static String normaliseRank(String rank) {
-        return rank?.toLowerCase()?.replaceAll("[^a-z]", "_")
-    }
-
     /**
      * Read the attribution file, building a map of ID -> name, dataProvider
      *
@@ -1425,7 +1432,7 @@ class ImportService {
 
                 docs.each { doc ->
                     def taxonID = doc.guid
-                    def kingdom = doc.rk_kingdom
+                    def kingdom = doc.kingdom
                     def name = doc.scientificName ?: doc.name
                     def rank = rankMap[doc.rank]
                     def image = null
@@ -1704,8 +1711,7 @@ class ImportService {
                     update["id"] = doc.id // doc key
                     update["idxtype"] = [set: doc.idxtype] // required field
                     update["guid"] = [set: doc.guid] // required field
-                    update["denormalised_b"] = [set: false ]
-                    doc.each { k, v -> if (k.startsWith("rk_") || k.startsWith("rkid_")) update[k] = [set: null] }
+                    update["denormalised_b"] = [set: false]
                     doc.each { k, v -> if (k.startsWith("commonName")) update[k] = [set: null] }
                     update["commonName"] = [set: null]
                     update["commonNameExact"] = [set: null]
@@ -1749,7 +1755,7 @@ class ImportService {
                 log.info("1. Paging over ${total} docs - page ${(processed + 1)}")
 
                 docs.each { doc ->
-                    denormaliseEntry(doc, [:], [], [], buffer, bufferLimit, pageSize, online, js, speciesGroupMapper, autoLanguages)
+                    denormaliseEntry(doc, buffer, bufferLimit, pageSize, online, js, autoLanguages)
                 }
                 processed++
                 if (!buffer.isEmpty())
@@ -1786,7 +1792,7 @@ class ImportService {
                 log.info("2. Paging over ${total} docs - page ${(processed + 1)}")
 
                 docs.each { doc ->
-                    denormaliseEntry(doc, [:], [], [], buffer, bufferLimit, pageSize, online, js, speciesGroupMapper, autoLanguages)
+                    denormaliseEntry(doc, buffer, bufferLimit, pageSize, online, js, autoLanguages)
                 }
                 processed++
                 if (!buffer.isEmpty())
@@ -1858,7 +1864,7 @@ class ImportService {
         log.info("Finished taxon denormalisaion. Duration: ${(new SimpleDateFormat("mm:ss.SSS")).format(new Date(endTime - startTime))}")
     }
 
-    private denormaliseEntry(doc, Map trace, List speciesGroups, List speciesSubGroups, List buffer, int bufferLimit, int pageSize, boolean online, JsonSlurper js, Map speciesGroupMapping, Set autoLanguages) {
+    private denormaliseEntry(doc, List buffer, int bufferLimit, int pageSize, boolean online, JsonSlurper js, Set autoLanguages) {
         def currentDistribution = (doc['distribution'] ?: []) as Set
         if (doc.denormalised_b)
             return currentDistribution
@@ -1866,31 +1872,11 @@ class ImportService {
         def update = [:]
         def distribution = [] as Set
         def guid = doc.guid
-        def scientificName = doc.scientificName
         update["id"] = doc.id // doc key
         update["idxtype"] = [set: doc.idxtype] // required field
         update["guid"] = [set: guid] // required field
-        update["denormalised_b"] = [set: true ]
-        update << trace
+        update["denormalised_b"] = [set: true]
 
-        if (doc.rank && doc.rankID && doc.rankID != 0) {
-            def normalisedRank = normaliseRank(doc.rank)
-            trace = trace.clone()
-            trace << [("rk_" + normalisedRank): [set: scientificName]]
-            trace << [("rkid_" + normalisedRank): [set: doc.guid]]
-            // we have a unique rank name and value, check if it's in the species group list
-            def rn = new RankedName(name: scientificName.toLowerCase(), rank: normalisedRank)
-            def speciesGroup = speciesGroupMapping[rn]
-            if (speciesGroup) {
-                log("Adding group ${speciesGroup.group} and subgroup ${speciesGroup.subGroup} to $scientificName")
-                speciesGroups = speciesGroups.clone()
-                speciesGroups << speciesGroup.group
-                speciesSubGroups = speciesSubGroups.clone()
-                speciesSubGroups << speciesGroup.subGroup
-            }
-            update["speciesGroup"] = [set: speciesGroups]
-            update["speciesSubgroup"] = [set: speciesSubGroups]
-        }
         def commonNames = searchService.lookupVernacular(guid, !online)
         if (commonNames && !commonNames.isEmpty()) {
             commonNames = commonNames.sort { n1, n2 ->
@@ -1922,7 +1908,7 @@ class ImportService {
             def json = js.parseText(queryResponse)
             def docs = json.response.docs
             docs.each { child ->
-                distribution.addAll(denormaliseEntry(child, trace, speciesGroups, speciesSubGroups, buffer, bufferLimit, pageSize, online, js, speciesGroupMapping, autoLanguages))
+                distribution.addAll(denormaliseEntry(child, buffer, bufferLimit, pageSize, online, js, autoLanguages))
             }
             prevCursor = cursor
             cursor = json.nextCursorMark

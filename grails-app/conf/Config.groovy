@@ -66,7 +66,7 @@ localityKeywordsUrl = this.class.getResource("/default-locality-keywords.json").
 
 nationalSpeciesDatasets = "" // "dr2699,dr2700,dr2702,dr2704,dr2703,dr3118"
 
-defaultDownloadFields = "guid,rank,scientificName,establishmentMeans,rk_genus,rk_family,rk_order,rk_class,rk_phylum,rk_kingdom,datasetName"
+defaultDownloadFields = "guid,rank,scientificName,establishmentMeans,genus,family,order,class,phylum,kingdom,datasetName"
 
 additionalResultFields = ""
 

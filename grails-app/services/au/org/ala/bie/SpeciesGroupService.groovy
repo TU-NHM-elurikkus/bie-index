@@ -74,7 +74,7 @@ class SpeciesGroupService {
     private static Map<RankedName, SubGroup> invertSpeciesGroups(speciesGroups) {
         speciesGroups.collectEntries { group ->
             group.taxa.collectEntries { taxon ->
-                [ (new RankedName(name: taxon.name?.toLowerCase(), rank: ImportService.normaliseRank(group.taxonRank))): new SubGroup(group: group.speciesGroup, subGroup: taxon.common) ]
+                [ (new RankedName(name: taxon.name?.toLowerCase(), rank: group.taxonRank)): new SubGroup(group: group.speciesGroup, subGroup: taxon.common) ]
             }
         }
     }
