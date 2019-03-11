@@ -42,7 +42,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
-import org.springframework.web.util.UriUtils
 
 import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -1689,13 +1688,13 @@ class ImportService {
         try {
             startTime = System.currentTimeMillis()
 
-            def solrServerUrl = baseUrl + "/select?wt=json&q=denormalised_b:true&rows=1"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&rows=1"
+            def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
-                solrServerUrl = baseUrl + "/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = solrServerUrl.toURL().getText("UTF-8")
+                solrServerUrl = "${baseUrl}/select?wt=json&q=denormalised_b:true&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1734,15 +1733,15 @@ class ImportService {
             processed = 0
             prevCursor = ""
             cursor = "*"
-            def typeQuery = "idxtype:\"" + IndexDocType.TAXON.name() + "\"+AND+-acceptedConceptID:*+AND+-parentGuid:*"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${typeQuery}&rows=1"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def typeQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+-acceptedConceptID:*+AND+-parentGuid:*"
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&rows=1"
+            def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
                 //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = "${baseUrl}/select?wt=json&q=${typeQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1771,14 +1770,14 @@ class ImportService {
             prevCursor = ""
             cursor = "*"
             def danglingQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND++-acceptedConceptID:*+AND+-denormalised_s:yes"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${danglingQuery}&rows=1"
-            def queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${danglingQuery}&rows=1"
+            def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
                 //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${danglingQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = "${baseUrl}/select?wt=json&q=${danglingQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1807,14 +1806,14 @@ class ImportService {
             prevCursor = ""
             cursor = "*"
             def synonymQuery = "idxtype:\"${IndexDocType.TAXON.name()}\"+AND+acceptedConceptID:*"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${synonymQuery}&rows=1"
-            def queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&rows=1"
+            def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
             def json = js.parseText(queryResponse)
             int total = json.response.numFound
             while (prevCursor != cursor) {
                 //startTime = System.currentTimeMillis()
-                solrServerUrl = baseUrl + "/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-                queryResponse = Encoder.encodeUrl(solrServerUrl).toURL().getText("UTF-8")
+                solrServerUrl = "${baseUrl}/select?wt=json&q=${synonymQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+                queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
                 json = js.parseText(queryResponse)
                 def docs = json.response.docs
                 def buffer = []
@@ -1911,10 +1910,9 @@ class ImportService {
         def prevCursor = ""
         def cursor = "*"
         while (cursor != prevCursor) {
-            def encGuid = UriUtils.encodeQueryParam(doc.guid, 'UTF-8')
-            def parentQuery = "idxtype:%22${IndexDocType.TAXON.name()}%22+AND+taxonomicStatus:accepted+AND+parentGuid:%22${encGuid}%22"
-            def solrServerUrl = baseUrl + "/select?wt=json&q=${parentQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
-            def queryResponse = solrServerUrl.toURL().getText("UTF-8")
+            def parentQuery = "idxtype\"${IndexDocType.TAXON.name()}\"+AND+taxonomicStatus:accepted+AND+parentGuid:\"${doc.guid}\""
+            def solrServerUrl = "${baseUrl}/select?wt=json&q=${parentQuery}&cursorMark=${cursor}&sort=id+asc&rows=${pageSize}"
+            def queryResponse = new URL(Encoder.encodeUrl(solrServerUrl)).getText("utf-8")
             def json = js.parseText(queryResponse)
             def docs = json.response.docs
             docs.each { child ->
