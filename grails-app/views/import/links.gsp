@@ -16,7 +16,6 @@
 <head>
   <title>Build Links</title>
   <meta name="layout" content="${grailsApplication.config.skin.layout}"/>
-    <r:require modules="sockets" />
     <style type="text/css">
         .progress {
             height: 10px !important;
@@ -62,11 +61,7 @@
     <div class="well import-info alert-info hide" style="margin-top:20px;">
         <p></p>
         <div class="progress hide">
-            <div class="progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                <span class="sr-only"><span class="percent">0</span>% Complete</span>
-            </div>
         </div>
-        <div id="import-info-web-socket"></div>
     </div>
 
     <r:script>
@@ -134,27 +129,6 @@
               $('.progress').removeClass('hide');
             });
         }
-    </r:script>
-
-    <r:script>
-        $(function() {
-            var socket = new SockJS("${createLink(uri: '/stomp')}");
-            var client = Stomp.over(socket);
-            client.connect({}, function() {
-                client.subscribe("/topic/import-feedback", function(message) {
-                    var msg = $.trim(message.body);
-                    if ($.isNumeric(msg)) {
-                        // update progress bar
-                        console.log('msg', msg);
-                        $('.progress-bar ').css('width', msg + '%').attr('aria-valuenow', msg);
-                        $('.progress-bar span.percent').html(msg);
-                    } else {
-                        // just a message
-                        $("#import-info-web-socket").append('<br/>' + message.body);
-                    }
-                });
-            });
-        });
     </r:script>
 </div>
 </body>
