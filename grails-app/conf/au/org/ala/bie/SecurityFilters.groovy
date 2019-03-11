@@ -13,7 +13,7 @@ class SecurityFilters {
             }
         }
 
-        all(uri: "/alaAdmin/**") {
+        all(uri: "/import/**") {
             before = {
                 // Access control by convention.
                 accessControl()
